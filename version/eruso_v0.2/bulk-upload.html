@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>일괄 등록 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .bulk-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .bulk-header {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .bulk-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2em;
+        }
+        
+        .bulk-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+        
+        .upload-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #d1d5db;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: #f9fafb;
+        }
+        
+        .upload-area:hover {
+            border-color: #f59e0b;
+            background: #fffbeb;
+        }
+        
+        .upload-area.dragover {
+            border-color: #d97706;
+            background: #fef3c7;
+        }
+        
+        .upload-icon {
+            font-size: 4em;
+            color: #f59e0b;
+            margin-bottom: 20px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .upload-btn {
+            padding: 12px 30px;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        .upload-btn:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        
+        .template-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .template-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .template-card:hover {
+            border-color: #f59e0b;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+        }
+        
+        .template-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        .template-card.hospital .template-icon {
+            color: #667eea;
+        }
+        
+        .template-card.pharmacy .template-icon {
+            color: #f093fb;
+        }
+        
+        .template-card.patient .template-icon {
+            color: #4facfe;
+        }
+        
+        .download-btn {
+            padding: 10px 20px;
+            background: #f9fafb;
+            color: #374151;
+            border: 2px solid #d1d5db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .download-btn:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        .progress-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .progress-card.active {
+            display: block;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .result-card.active {
+            display: block;
+        }
+        
+        .result-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .result-stat {
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .result-stat.success {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .result-stat.error {
+            background: #f8d7da;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .result-stat .value {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .result-stat.success .value {
+            color: #155724;
+        }
+        
+        .result-stat.error .value {
+            color: #721c24;
+        }
+        
+        .result-stat .label {
+            color: #666;
+        }
+        
+        .error-list {
+            margin-top: 20px;
+        }
+        
+        .error-item {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .error-item strong {
+            color: #856404;
+        }
+        
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .preview-table th,
+        .preview-table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .preview-table th {
+            background: #f9fafb;
+            font-weight: 600;
+        }
+        
+        .preview-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .instructions {
+            background: #dbeafe;
+            border: 2px solid #93c5fd;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h3 {
+            color: #1e40af;
+            margin-top: 0;
+        }
+        
+        .instructions ol {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+            color: #1e3a8a;
+        }
+        
+        .example-format {
+            background: #1f2937;
+            color: #10b981;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="bulk-container">
+        <div class="bulk-header">
+            <h1><i class="fas fa-file-upload"></i> 일괄 등록</h1>
+            <p>CSV 파일로 병원, 약국, 환자 정보를 한 번에 등록하세요</p>
+            <div style="margin-top: 20px;">
+                <button onclick="viewPharmacyData()" class="upload-btn" style="background: #8b5cf6; margin-right: 10px;">
+                    <i class="fas fa-search"></i> 약국 데이터 조회
+                </button>
+                <button onclick="window.location.href='add-data.html'" class="upload-btn" style="background: #10b981;">
+                    <i class="fas fa-arrow-left"></i> 개별 등록으로 돌아가기
+                </button>
+            </div>
+        </div>
+
+        <!-- 사용 안내 -->
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> 사용 방법</h3>
+            <ol>
+                <li>아래에서 원하는 데이터 유형의 템플릿을 다운로드합니다</li>
+                <li>Excel 또는 텍스트 편집기로 CSV 파일을 열고 데이터를 입력합니다</li>
+                <li><strong style="color: #dc2626;">⚠️ 권장:</strong> <a href="csv-validator.html" style="color: #3b82f6; font-weight: bold;">CSV 검증 도구</a>로 오류를 미리 확인하세요</li>
+                <li>CSV 파일을 저장합니다 (UTF-8 인코딩 권장)</li>
+                <li>업로드 영역에 파일을 드래그하거나 클릭하여 선택합니다</li>
+                <li>미리보기를 확인한 후 "일괄 등록 실행" 버튼을 클릭합니다</li>
+            </ol>
+            <div style="margin-top: 15px; padding: 15px; background: #fef3c7; border-radius: 8px;">
+                <strong style="color: #d97706;"><i class="fas fa-lightbulb"></i> 팁:</strong>
+                업로드 전에 <a href="csv-validator.html" style="color: #3b82f6; font-weight: bold; text-decoration: underline;">CSV 검증 도구</a>를 사용하면 오류를 사전에 방지할 수 있습니다!
+            </div>
+        </div>
+
+        <!-- 템플릿 다운로드 -->
+        <div class="upload-card">
+            <h2><i class="fas fa-download"></i> CSV 템플릿 다운로드</h2>
+            <div class="template-section">
+                <!-- 병원 템플릿 -->
+                <div class="template-card hospital">
+                    <div class="template-icon"><i class="fas fa-hospital"></i></div>
+                    <h3>병원 템플릿</h3>
+                    <p style="margin: 10px 0; color: #666;">병원 및 담당자 정보</p>
+                    <button class="download-btn" onclick="downloadTemplate('hospital')">
+                        <i class="fas fa-file-csv"></i> 다운로드
+                    </button>
+                </div>
+
+                <!-- 약국 템플릿 -->
+                <div class="template-card pharmacy">
+                    <div class="template-icon"><i class="fas fa-clinic-medical"></i></div>
+                    <h3>약국 템플릿</h3>
+                    <p style="margin: 10px 0; color: #666;">약국 및 약사 정보</p>
+                    <button class="download-btn" onclick="downloadTemplate('pharmacy')">
+                        <i class="fas fa-file-csv"></i> 다운로드
+                    </button>
+                </div>
+
+                <!-- 환자 템플릿 -->
+                <div class="template-card patient">
+                    <div class="template-icon"><i class="fas fa-users"></i></div>
+                    <h3>환자 템플릿</h3>
+                    <p style="margin: 10px 0; color: #666;">환자 기본 정보</p>
+                    <button class="download-btn" onclick="downloadTemplate('patient')">
+                        <i class="fas fa-file-csv"></i> 다운로드
+                    </button>
+                </div>
+            </div>
+
+            <!-- CSV 형식 예시 -->
+            <div style="margin-top: 30px;">
+                <h3><i class="fas fa-book-open"></i> CSV 형식 예시</h3>
+                
+                <h4 style="color: #667eea;">병원 (hospitals.csv)</h4>
+                <div class="example-format">
+병원명,주소,전화번호,면허번호,담당자명,담당자이메일,담당자전화번호
+조치원중앙병원,세종특별자치시 조치원읍 군청로 93,044-860-1000,H2024-001,김의사,doctor1@hospital.com,010-1111-2222
+조치원시립병원,세종특별자치시 조치원읍 문화로 456,044-860-2000,H2024-002,이의사,doctor2@hospital.com,010-3333-4444
+                </div>
+
+                <h4 style="color: #f093fb;">약국 (pharmacies.csv)</h4>
+                <div class="example-format">
+약국명,주소,전화번호,면허번호,약사명,약사이메일,약사전화번호
+조치원건강약국,세종특별자치시 조치원읍 문화로 123,044-865-2000,P2024-001,이약사,pharmacist1@pharmacy.com,010-5555-6666
+조치원중앙약국,세종특별자치시 조치원읍 번영로 789,044-865-3000,P2024-002,박약사,pharmacist2@pharmacy.com,010-7777-8888
+                </div>
+
+                <h4 style="color: #4facfe;">환자 (patients.csv)</h4>
+                <div class="example-format">
+이름,이메일,전화번호,주소,생년월일
+김환자,patient1@example.com,010-1234-5678,세종특별자치시 조치원읍 서부로 123,1990-01-15
+이환자,patient2@example.com,010-2345-6789,세종특별자치시 조치원읍 동부로 456,1985-05-20
+박환자,patient3@example.com,010-3456-7890,세종특별자치시 조치원읍 남부로 789,1995-10-30
+                </div>
+            </div>
+        </div>
+
+        <!-- 파일 업로드 -->
+        <div class="upload-card">
+            <h2><i class="fas fa-cloud-upload-alt"></i> CSV 파일 업로드</h2>
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                <h3>파일을 여기에 드래그하거나 클릭하여 선택하세요</h3>
+                <p style="color: #666;">지원 형식: CSV (UTF-8 인코딩 권장)</p>
+                <button class="upload-btn" style="margin-top: 20px;">
+                    <i class="fas fa-folder-open"></i> 파일 선택
+                </button>
+            </div>
+            <input type="file" id="fileInput" class="file-input" accept=".csv" onchange="handleFileSelect(event)">
+            
+            <!-- 선택된 파일 정보 -->
+            <div id="fileInfo" style="display: none; margin-top: 20px; padding: 15px; background: #f0fdf4; border: 2px solid #86efac; border-radius: 8px;">
+                <h4 style="color: #16a34a; margin: 0 0 10px 0;">
+                    <i class="fas fa-check-circle"></i> 파일 선택됨
+                </h4>
+                <p style="margin: 5px 0;"><strong>파일명:</strong> <span id="fileName"></span></p>
+                <p style="margin: 5px 0;"><strong>파일 크기:</strong> <span id="fileSize"></span></p>
+                <p style="margin: 5px 0;"><strong>데이터 행 수:</strong> <span id="rowCount"></span></p>
+            </div>
+        </div>
+
+        <!-- 미리보기 -->
+        <div class="upload-card" id="previewCard" style="display: none;">
+            <h2><i class="fas fa-eye"></i> 데이터 미리보기</h2>
+            <p style="color: #666; margin-bottom: 20px;">업로드할 데이터를 확인하세요. (처음 5개 행만 표시)</p>
+            <div id="previewContent"></div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button class="upload-btn" onclick="executeBulkUpload()">
+                    <i class="fas fa-upload"></i> 일괄 등록 실행
+                </button>
+            </div>
+        </div>
+
+        <!-- 진행 상황 -->
+        <div class="progress-card" id="progressCard">
+            <h2><i class="fas fa-spinner fa-spin"></i> 등록 진행 중...</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%;">0%</div>
+            </div>
+            <p id="progressText" style="text-align: center; color: #666;">준비 중...</p>
+        </div>
+
+        <!-- 결과 -->
+        <div class="result-card" id="resultCard">
+            <h2><i class="fas fa-check-circle" style="color: #16a34a;"></i> 등록 완료</h2>
+            <div class="result-summary">
+                <div class="result-stat success">
+                    <div class="value" id="successCount">0</div>
+                    <div class="label">성공</div>
+                </div>
+                <div class="result-stat error">
+                    <div class="value" id="errorCount">0</div>
+                    <div class="label">실패</div>
+                </div>
+            </div>
+            
+            <div id="errorSection" style="display: none;">
+                <h3 style="color: #dc2626;"><i class="fas fa-exclamation-triangle"></i> 오류 목록</h3>
+                <div class="error-list" id="errorList"></div>
+            </div>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="upload-btn" onclick="location.reload()">
+                    <i class="fas fa-redo"></i> 다시 등록하기
+                </button>
+                <button class="upload-btn" onclick="location.href='add-data.html'" style="background: #667eea; margin-left: 10px;">
+                    <i class="fas fa-list"></i> 데이터 조회
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        let uploadedData = [];
+        let dataType = '';
+
+        // URL 파라미터로 역할 확인
+        const urlParams = new URLSearchParams(window.location.search);
+        const userRole = urlParams.get('role');
+
+        // 페이지 로드 시 역할별 안내 메시지 표시
+        window.addEventListener('DOMContentLoaded', () => {
+            if (userRole) {
+                const roleNames = {
+                    'patient': '환자',
+                    'hospital': '병원',
+                    'pharmacy': '약국',
+                    'admin': '관리자'
+                };
+                
+                const headerTitle = document.querySelector('.bulk-header h1');
+                const headerDesc = document.querySelector('.bulk-header p');
+                
+                if (headerTitle && headerDesc) {
+                    headerTitle.innerHTML = `<i class="fas fa-file-upload"></i> 일괄 등록 (${roleNames[userRole] || ''} 포털)`;
+                    
+                    // 역할별 설명 메시지
+                    if (userRole === 'patient') {
+                        headerDesc.textContent = 'CSV 파일로 병원과 약국 정보를 한 번에 등록하세요';
+                    } else if (userRole === 'hospital') {
+                        headerDesc.textContent = 'CSV 파일로 환자와 약국 정보를 한 번에 등록하세요';
+                    }
+                }
+            }
+        });
+
+        // 드래그 앤 드롭 이벤트
+        const uploadArea = document.getElementById('uploadArea');
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        // 파일 선택 처리
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        // 파일 처리
+        function handleFile(file) {
+            if (!file.name.endsWith('.csv')) {
+                alert('CSV 파일만 업로드 가능합니다.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                parseCSV(text, file);
+            };
+            reader.readAsText(file, 'UTF-8');
+        }
+
+        // CSV 파싱
+        function parseCSV(text, file) {
+            const lines = text.trim().split('\n');
+            if (lines.length < 2) {
+                alert('CSV 파일에 데이터가 없습니다.');
+                return;
+            }
+
+            const headers = lines[0].split(',').map(h => h.trim());
+            
+            // 데이터 유형 감지
+            if (headers.includes('병원명') || headers.includes('hospital_name')) {
+                dataType = 'hospital';
+            } else if (headers.includes('약국명') || headers.includes('pharmacy_name')) {
+                dataType = 'pharmacy';
+            } else if (headers.includes('이름') && !headers.includes('담당자명') && !headers.includes('약사명')) {
+                dataType = 'patient';
+            } else {
+                alert('지원하지 않는 CSV 형식입니다. 템플릿을 사용해주세요.');
+                return;
+            }
+
+            // 데이터 파싱
+            uploadedData = [];
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(',').map(v => v.trim());
+                if (values.length === headers.length && values.some(v => v !== '')) {
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header] = values[index];
+                    });
+                    uploadedData.push(row);
+                }
+            }
+
+            if (uploadedData.length === 0) {
+                alert('유효한 데이터가 없습니다.');
+                return;
+            }
+
+            // 파일 정보 표시
+            document.getElementById('fileInfo').style.display = 'block';
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('rowCount').textContent = uploadedData.length + '개';
+
+            // 미리보기 표시
+            showPreview();
+        }
+
+        // 파일 크기 포맷
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        // 미리보기 표시
+        function showPreview() {
+            const previewCard = document.getElementById('previewCard');
+            const previewContent = document.getElementById('previewContent');
+            
+            const preview = uploadedData.slice(0, 5);
+            const headers = Object.keys(preview[0]);
+            
+            let html = '<table class="preview-table"><thead><tr>';
+            headers.forEach(header => {
+                html += `<th>${header}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+            
+            preview.forEach(row => {
+                html += '<tr>';
+                headers.forEach(header => {
+                    html += `<td>${row[header]}</td>`;
+                });
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            
+            if (uploadedData.length > 5) {
+                html += `<p style="margin-top: 15px; color: #666; text-align: center;">... 외 ${uploadedData.length - 5}개 행</p>`;
+            }
+            
+            previewContent.innerHTML = html;
+            previewCard.style.display = 'block';
+        }
+
+        // 일괄 등록 실행
+        async function executeBulkUpload() {
+            if (uploadedData.length === 0) {
+                alert('업로드할 데이터가 없습니다.');
+                return;
+            }
+
+            // 진행 상황 표시
+            document.getElementById('previewCard').style.display = 'none';
+            document.getElementById('progressCard').classList.add('active');
+            
+            let successCount = 0;
+            let errorCount = 0;
+            const errors = [];
+
+            try {
+                for (let i = 0; i < uploadedData.length; i++) {
+                    const row = uploadedData[i];
+                    const progress = Math.round(((i + 1) / uploadedData.length) * 100);
+                    
+                    // 진행률 업데이트
+                    document.getElementById('progressFill').style.width = progress + '%';
+                    document.getElementById('progressFill').textContent = progress + '%';
+                    document.getElementById('progressText').textContent = `${i + 1} / ${uploadedData.length} 처리 중...`;
+
+                    try {
+                        if (dataType === 'hospital') {
+                            await createHospital(row);
+                        } else if (dataType === 'pharmacy') {
+                            await createPharmacy(row);
+                        } else if (dataType === 'patient') {
+                            await createPatient(row);
+                        }
+                        successCount++;
+                    } catch (error) {
+                        errorCount++;
+                        errors.push({ row: i + 1, data: row, error: error.message });
+                    }
+
+                    // 서버 부하 방지를 위한 딜레이
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            } catch (error) {
+                console.error('일괄 등록 오류:', error);
+            }
+
+            // 결과 표시
+            showResult(successCount, errorCount, errors);
+        }
+
+        // 병원 생성
+        async function createHospital(row) {
+            const userId = generateUUID();
+            const hospitalId = generateUUID();
+
+            // 사용자 생성
+            const userData = {
+                id: userId,
+                name: row['담당자명'] || row['manager_name'],
+                email: row['담당자이메일'] || row['manager_email'],
+                phone: row['담당자전화번호'] || row['manager_phone'],
+                role: 'hospital',
+                address: row['주소'] || row['address'],
+                status: 'active',
+                created_at: Date.now()
+            };
+
+            await fetch('tables/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            // 병원 생성
+            const hospitalData = {
+                id: hospitalId,
+                name: row['병원명'] || row['hospital_name'],
+                address: row['주소'] || row['address'],
+                phone: row['전화번호'] || row['phone'],
+                license_number: row['면허번호'] || row['license_number'],
+                user_id: userId,
+                status: 'active',
+                created_at: Date.now()
+            };
+
+            const response = await fetch('tables/hospitals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(hospitalData)
+            });
+
+            if (!response.ok) throw new Error('병원 등록 실패');
+        }
+
+        // 약국 생성
+        async function createPharmacy(row) {
+            const userId = generateUUID();
+            const pharmacyId = generateUUID();
+
+            // 사용자 생성
+            const userData = {
+                id: userId,
+                name: row['약사명'] || row['pharmacist_name'],
+                email: row['약사이메일'] || row['pharmacist_email'],
+                phone: row['약사전화번호'] || row['pharmacist_phone'],
+                role: 'pharmacy',
+                address: row['주소'] || row['address'],
+                status: 'active',
+                created_at: Date.now()
+            };
+
+            await fetch('tables/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            // 약국 생성
+            const pharmacyData = {
+                id: pharmacyId,
+                name: row['약국명'] || row['pharmacy_name'],
+                address: row['주소'] || row['address'],
+                phone: row['전화번호'] || row['phone'],
+                license_number: row['면허번호'] || row['license_number'],
+                user_id: userId,
+                status: 'active',
+                created_at: Date.now()
+            };
+
+            const response = await fetch('tables/pharmacies', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pharmacyData)
+            });
+
+            if (!response.ok) throw new Error('약국 등록 실패');
+        }
+
+        // 환자 생성
+        async function createPatient(row) {
+            const userId = generateUUID();
+
+            const userData = {
+                id: userId,
+                name: row['이름'] || row['name'],
+                email: row['이메일'] || row['email'],
+                phone: row['전화번호'] || row['phone'],
+                role: 'patient',
+                address: row['주소'] || row['address'],
+                status: 'active',
+                created_at: Date.now()
+            };
+
+            const response = await fetch('tables/users', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(userData)
+            });
+
+            if (!response.ok) throw new Error('환자 등록 실패');
+        }
+
+        // 결과 표시
+        function showResult(successCount, errorCount, errors) {
+            document.getElementById('progressCard').classList.remove('active');
+            document.getElementById('resultCard').classList.add('active');
+            
+            document.getElementById('successCount').textContent = successCount;
+            document.getElementById('errorCount').textContent = errorCount;
+
+            if (errors.length > 0) {
+                document.getElementById('errorSection').style.display = 'block';
+                const errorList = document.getElementById('errorList');
+                
+                let html = '';
+                errors.forEach(error => {
+                    html += `<div class="error-item">`;
+                    html += `<strong>행 ${error.row}:</strong> ${error.error}<br>`;
+                    html += `<small>${JSON.stringify(error.data)}</small>`;
+                    html += `</div>`;
+                });
+                
+                errorList.innerHTML = html;
+            }
+        }
+
+        // 템플릿 다운로드
+        function downloadTemplate(type) {
+            let csv = '';
+            let filename = '';
+
+            if (type === 'hospital') {
+                csv = '병원명,주소,전화번호,면허번호,담당자명,담당자이메일,담당자전화번호\n';
+                csv += '조치원중앙병원,세종특별자치시 조치원읍 군청로 93,044-860-1000,H2024-001,김의사,doctor@hospital.com,010-1111-2222\n';
+                filename = 'hospitals_template.csv';
+            } else if (type === 'pharmacy') {
+                csv = '약국명,주소,전화번호,면허번호,약사명,약사이메일,약사전화번호\n';
+                csv += '조치원건강약국,세종특별자치시 조치원읍 문화로 123,044-865-2000,P2024-001,이약사,pharmacist@pharmacy.com,010-5555-6666\n';
+                filename = 'pharmacies_template.csv';
+            } else if (type === 'patient') {
+                csv = '이름,이메일,전화번호,주소,생년월일\n';
+                csv += '김환자,patient@example.com,010-1234-5678,세종특별자치시 조치원읍 서부로 123,1990-01-15\n';
+                filename = 'patients_template.csv';
+            }
+
+            // UTF-8 BOM 추가 (Excel 호환성)
+            const BOM = '\uFEFF';
+            const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+
+        // 약국 데이터 조회
+        async function viewPharmacyData() {
+            try {
+                const response = await fetch('tables/pharmacies?page=1&limit=100');
+                if (!response.ok) {
+                    throw new Error('약국 데이터를 불러오는데 실패했습니다.');
+                }
+
+                const result = await response.json();
+                const pharmacies = result.data || [];
+
+                // 모달 생성
+                const modalHTML = `
+                    <div id="pharmacyModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000;">
+                        <div style="background: white; border-radius: 15px; max-width: 1200px; width: 90%; max-height: 80vh; overflow: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                            <div style="padding: 30px; border-bottom: 2px solid #e5e7eb;">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <h2 style="margin: 0; color: #8b5cf6;"><i class="fas fa-clinic-medical"></i> 등록된 약국 목록</h2>
+                                    <button onclick="closePharmacyModal()" style="background: none; border: none; font-size: 2em; cursor: pointer; color: #6b7280;">&times;</button>
+                                </div>
+                                <p style="margin: 10px 0 0 0; color: #6b7280;">총 ${pharmacies.length}개의 약국이 등록되어 있습니다.</p>
+                            </div>
+                            <div style="padding: 30px; overflow-x: auto;">
+                                ${pharmacies.length === 0 ? 
+                                    '<div style="text-align: center; padding: 40px; color: #9ca3af;"><i class="fas fa-inbox" style="font-size: 3em; margin-bottom: 20px;"></i><p>등록된 약국이 없습니다.</p></div>' :
+                                    `<table style="width: 100%; border-collapse: collapse;">
+                                        <thead>
+                                            <tr style="background: #f9fafb; border-bottom: 2px solid #e5e7eb;">
+                                                <th style="padding: 15px; text-align: left; font-weight: 600; color: #374151;">약국명</th>
+                                                <th style="padding: 15px; text-align: left; font-weight: 600; color: #374151;">주소</th>
+                                                <th style="padding: 15px; text-align: left; font-weight: 600; color: #374151;">전화번호</th>
+                                                <th style="padding: 15px; text-align: left; font-weight: 600; color: #374151;">면허번호</th>
+                                                <th style="padding: 15px; text-align: center; font-weight: 600; color: #374151;">상태</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${pharmacies.map(p => `
+                                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                                    <td style="padding: 15px;"><strong style="color: #8b5cf6;">${p.name}</strong></td>
+                                                    <td style="padding: 15px; color: #6b7280;">${p.address}</td>
+                                                    <td style="padding: 15px; color: #6b7280;">${p.phone}</td>
+                                                    <td style="padding: 15px; color: #6b7280;">${p.license_number}</td>
+                                                    <td style="padding: 15px; text-align: center;">
+                                                        <span style="padding: 5px 12px; border-radius: 20px; font-size: 0.875em; font-weight: 600; ${p.status === 'active' ? 'background: #d4edda; color: #155724;' : 'background: #f8d7da; color: #721c24;'}">
+                                                            ${p.status === 'active' ? '활성' : '비활성'}
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            `).join('')}
+                                        </tbody>
+                                    </table>`
+                                }
+                                <div style="margin-top: 20px; text-align: center;">
+                                    <button onclick="closePharmacyModal()" style="padding: 12px 30px; background: #8b5cf6; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
+                                        <i class="fas fa-times"></i> 닫기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+            } catch (error) {
+                alert('오류: ' + error.message);
+                console.error('약국 데이터 조회 오류:', error);
+            }
+        }
+
+        function closePharmacyModal() {
+            const modal = document.getElementById('pharmacyModal');
+            if (modal) {
+                modal.remove();
+            }
+        }
+    </script>
+</body>
+</html>

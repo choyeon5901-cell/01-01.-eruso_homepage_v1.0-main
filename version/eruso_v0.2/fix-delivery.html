@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>빠른 수정 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .instruction {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+        }
+        .step {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #10b981;
+        }
+        .step h3 {
+            color: #10b981;
+            margin-bottom: 0.5rem;
+        }
+        .warning {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="padding: 2rem;">
+        <div class="instruction">
+            <h1 style="margin-bottom: 1rem;">🔧 배송 상태 "대기중" 문제 해결</h1>
+            <p style="font-size: 1.1rem; opacity: 0.9;">
+                처방전 상태는 "완료"인데 배송 상태가 "대기중"으로 표시되는 문제를 해결합니다.
+            </p>
+        </div>
+
+        <div class="warning">
+            <h3 style="color: #d97706; margin-bottom: 0.5rem;">⚠️ 현재 문제</h3>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+                <li>발행일: 2024. 02. 11. 오후 08:24</li>
+                <li>배송 상태: <strong style="color: #ef4444;">대기중</strong> (잘못됨)</li>
+                <li>예상 상태: <strong style="color: #10b981;">배송완료</strong> (완료된 처방전)</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>해결 방법 (자동 수정)</h2>
+            
+            <div class="step">
+                <h3>1단계: 문제 확인</h3>
+                <p>현재 데이터베이스의 상태 불일치를 확인합니다.</p>
+                <button class="btn btn-primary" onclick="window.location.href='sync.html'">
+                    <i class="fas fa-sync-alt"></i> sync.html 열기
+                </button>
+            </div>
+
+            <div class="step">
+                <h3>2단계: 자동 수정</h3>
+                <p>sync.html 페이지에서 "배송 정보 동기화 실행" 버튼을 클릭합니다.</p>
+            </div>
+
+            <div class="step">
+                <h3>3단계: 결과 확인</h3>
+                <p>환자 포털 또는 약국 포털에서 배송 상태가 정상적으로 표시되는지 확인합니다.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>수동 수정 (고급 사용자)</h2>
+            <p>특정 처방전의 배송 상태만 수정하고 싶으시면 아래 도구를 사용하세요.</p>
+            
+            <div style="margin-top: 1rem;">
+                <label class="form-label">처방전 ID</label>
+                <input type="text" id="prescriptionId" class="form-input" placeholder="처방전 ID 입력">
+            </div>
+
+            <div style="margin-top: 1rem;">
+                <label class="form-label">배송 상태</label>
+                <select id="deliveryStatus" class="form-select">
+                    <option value="pending">대기중</option>
+                    <option value="in_transit">배송중</option>
+                    <option value="delivered" selected>배송완료</option>
+                    <option value="failed">배송실패</option>
+                </select>
+            </div>
+
+            <button class="btn btn-success" onclick="updateSingleDelivery()" style="margin-top: 1rem;">
+                <i class="fas fa-check"></i> 단일 배송 정보 업데이트
+            </button>
+
+            <div id="updateResult" style="margin-top: 1rem;"></div>
+        </div>
+
+        <div class="card">
+            <h2>예방 방법</h2>
+            <p>앞으로 이런 문제가 발생하지 않도록 하려면:</p>
+            <ul style="margin-left: 1.5rem; line-height: 2;">
+                <li>약국 포털에서 <strong>"배송 시작"</strong> 버튼을 클릭하여 배송을 시작하세요</li>
+                <li>환자 포털에서 <strong>QR 인증</strong>으로 수령을 완료하세요</li>
+                <li>상태가 자동으로 업데이트되지 않으면 sync.html로 수정하세요</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        async function updateSingleDelivery() {
+            const prescriptionId = document.getElementById('prescriptionId').value.trim();
+            const deliveryStatus = document.getElementById('deliveryStatus').value;
+            const resultDiv = document.getElementById('updateResult');
+
+            if (!prescriptionId) {
+                resultDiv.innerHTML = '<p style="color: #ef4444;">❌ 처방전 ID를 입력하세요.</p>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="spinner"></div><p>업데이트 중...</p>';
+
+            try {
+                // 배송 정보 찾기
+                const deliveriesData = await fetchTableData('deliveries');
+                const delivery = deliveriesData?.data?.find(d => d.prescription_id === prescriptionId);
+
+                if (!delivery) {
+                    resultDiv.innerHTML = '<p style="color: #ef4444;">❌ 해당 처방전의 배송 정보를 찾을 수 없습니다.</p>';
+                    return;
+                }
+
+                // 배송 상태 업데이트
+                const updateData = {
+                    status: deliveryStatus
+                };
+
+                // delivered 상태인 경우 delivered_at도 업데이트
+                if (deliveryStatus === 'delivered' && !delivery.delivered_at) {
+                    updateData.delivered_at = new Date().toISOString();
+                }
+
+                const result = await patchRecord('deliveries', delivery.id, updateData);
+
+                if (result) {
+                    resultDiv.innerHTML = `
+                        <div style="padding: 1rem; background: #d1fae5; border: 1px solid #10b981; border-radius: 0.5rem; color: #065f46;">
+                            <h4 style="margin: 0 0 0.5rem 0;">✅ 업데이트 완료!</h4>
+                            <p style="margin: 0;">처방전 ID: ${prescriptionId.substring(0, 8)}</p>
+                            <p style="margin: 0;">배송 상태: ${getStatusText(delivery.status)} → ${getStatusText(deliveryStatus)}</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<p style="color: #ef4444;">❌ 업데이트에 실패했습니다.</p>';
+                }
+
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: #ef4444;">❌ 에러: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

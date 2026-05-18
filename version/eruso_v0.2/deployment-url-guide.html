@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗 배포 URL 확인 가이드</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .alert-box {
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+        .alert-danger {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        .alert-warning {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        .alert-info {
+            background: #dbeafe;
+            border-color: #2563eb;
+            color: #1e40af;
+        }
+        .alert-success {
+            background: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+        .code-box {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .step-box {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+        .step-number {
+            background: #2563eb;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-pills"></i>
+                조치원 스마트 약배송
+            </a>
+            <div>
+                <a href="start.html" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> 시작 페이지
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding: 2rem 20px; max-width: 1000px;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">
+                <i class="fas fa-link" style="color: #ef4444;"></i>
+                배포 URL 확인 가이드
+            </h1>
+            <p style="color: #6b7280; font-size: 1.1rem;">
+                "이 페이지에 연결할 수 없습니다" 오류 해결
+            </p>
+        </div>
+
+        <!-- 오류 설명 -->
+        <div class="alert-box alert-danger">
+            <h2 style="margin-bottom: 1rem;">
+                <i class="fas fa-exclamation-triangle"></i> 현재 오류
+            </h2>
+            <div class="code-box" style="background: #7f1d1d; color: white;">
+DNS_PROBE_FINISHED_NXDOMAIN
+홉... 이 페이지에 연결할 수 없습니다.
+your-site.genspark.app 오타가 있는지 확인합니다.
+            </div>
+            <p style="margin-top: 1rem; font-weight: bold;">
+                ⚠️ 이것은 도메인을 찾을 수 없다는 의미입니다.
+            </p>
+        </div>
+
+        <!-- 원인 분석 -->
+        <div class="card">
+            <h2 style="color: #ef4444; margin-bottom: 1.5rem;">
+                <i class="fas fa-search"></i> 원인 분석
+            </h2>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <h3 style="color: #dc2626; margin-bottom: 1rem;">
+                    ❌ 가능한 원인들:
+                </h3>
+                <ul style="line-height: 2; margin-left: 1.5rem;">
+                    <li>
+                        <strong>배포가 완료되지 않음</strong>
+                        <br>
+                        <span style="color: #6b7280; font-size: 0.9rem;">
+                        → Publish 탭에서 배포가 진행 중이거나 실패했을 수 있음
+                        </span>
+                    </li>
+                    <li>
+                        <strong>잘못된 URL 사용</strong>
+                        <br>
+                        <span style="color: #6b7280; font-size: 0.9rem;">
+                        → "your-site" 부분이 실제 프로젝트 이름으로 변경되지 않음
+                        </span>
+                    </li>
+                    <li>
+                        <strong>배포 URL을 확인하지 않음</strong>
+                        <br>
+                        <span style="color: #6b7280; font-size: 0.9rem;">
+                        → Publish 탭에서 실제 배포된 URL을 복사하지 않고 예시 URL 사용
+                        </span>
+                    </li>
+                    <li>
+                        <strong>DNS 전파 대기 중</strong>
+                        <br>
+                        <span style="color: #6b7280; font-size: 0.9rem;">
+                        → 방금 배포했다면 몇 분 정도 기다려야 할 수 있음
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 해결 방법 -->
+        <div class="card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+            <h2 style="color: white; margin-bottom: 1.5rem;">
+                <i class="fas fa-check-circle"></i> 올바른 배포 URL 찾는 방법
+            </h2>
+            
+            <div class="step-box" style="background: white; color: #111827;">
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <span class="step-number">1</span>
+                    <h3 style="margin: 0;">Genspark으로 돌아가기</h3>
+                </div>
+                <p style="margin-left: 56px;">
+                    이 프로젝트가 있는 Genspark 탭/창으로 돌아갑니다.
+                </p>
+            </div>
+
+            <div class="step-box" style="background: white; color: #111827;">
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <span class="step-number">2</span>
+                    <h3 style="margin: 0;">Publish 탭 클릭</h3>
+                </div>
+                <p style="margin-left: 56px; margin-bottom: 1rem;">
+                    화면 상단에서 <strong>"Publish"</strong> 탭을 찾아 클릭합니다.
+                </p>
+                <div style="margin-left: 56px; background: #f9fafb; padding: 1rem; border-radius: 4px;">
+                    <p style="margin: 0; color: #6b7280;">
+                        💡 Publish 탭이 없다면 아직 배포하지 않은 것입니다.
+                    </p>
+                </div>
+            </div>
+
+            <div class="step-box" style="background: white; color: #111827;">
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <span class="step-number">3</span>
+                    <h3 style="margin: 0;">배포 상태 확인</h3>
+                </div>
+                <p style="margin-left: 56px; margin-bottom: 1rem;">
+                    다음 중 하나의 상태를 확인하세요:
+                </p>
+                <div style="margin-left: 56px;">
+                    <div style="background: #d1fae5; padding: 1rem; border-radius: 4px; margin-bottom: 0.5rem; border-left: 4px solid #10b981;">
+                        <strong style="color: #065f46;">✅ 배포 완료:</strong>
+                        <p style="margin: 0.5rem 0 0 0; color: #065f46;">
+                            배포된 URL이 표시됩니다 (예: https://abc123def.genspark.app)
+                        </p>
+                    </div>
+                    <div style="background: #fef3c7; padding: 1rem; border-radius: 4px; margin-bottom: 0.5rem; border-left: 4px solid #f59e0b;">
+                        <strong style="color: #92400e;">⏳ 배포 중:</strong>
+                        <p style="margin: 0.5rem 0 0 0; color: #92400e;">
+                            진행 표시줄이 보입니다. 완료될 때까지 기다려주세요.
+                        </p>
+                    </div>
+                    <div style="background: #fee2e2; padding: 1rem; border-radius: 4px; border-left: 4px solid #ef4444;">
+                        <strong style="color: #991b1b;">❌ 배포 실패:</strong>
+                        <p style="margin: 0.5rem 0 0 0; color: #991b1b;">
+                            에러 메시지가 표시됩니다. "Deploy" 버튼을 다시 클릭하세요.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="step-box" style="background: white; color: #111827;">
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <span class="step-number">4</span>
+                    <h3 style="margin: 0;">실제 URL 복사</h3>
+                </div>
+                <p style="margin-left: 56px; margin-bottom: 1rem;">
+                    배포가 완료되면 <strong>실제 배포된 URL</strong>이 표시됩니다.
+                </p>
+                <div style="margin-left: 56px; background: #dbeafe; padding: 1rem; border-radius: 4px;">
+                    <p style="margin: 0; color: #1e40af; font-weight: bold;">
+                        예시:
+                    </p>
+                    <div class="code-box" style="background: #1e40af; color: white; margin-top: 0.5rem;">
+https://project-abc123def456.genspark.app
+https://jochiwon-delivery-xyz789.genspark.app
+https://smart-medicine-delivery-123.genspark.app
+                    </div>
+                    <p style="margin: 0.5rem 0 0 0; color: #1e40af;">
+                        👆 이런 형식의 URL이 표시됩니다. <strong>복사</strong> 버튼을 클릭하세요.
+                    </p>
+                </div>
+            </div>
+
+            <div class="step-box" style="background: white; color: #111827;">
+                <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                    <span class="step-number">5</span>
+                    <h3 style="margin: 0;">새 탭에서 열기</h3>
+                </div>
+                <p style="margin-left: 56px;">
+                    복사한 URL을 브라우저 주소창에 붙여넣고 Enter를 누릅니다.
+                </p>
+            </div>
+        </div>
+
+        <!-- 아직 배포하지 않은 경우 -->
+        <div class="card">
+            <h2 style="color: #f59e0b; margin-bottom: 1.5rem;">
+                <i class="fas fa-rocket"></i> 아직 배포하지 않은 경우
+            </h2>
+            
+            <div class="alert-box alert-warning">
+                <p style="font-weight: bold; margin-bottom: 1rem;">
+                    Publish 탭이 없거나 "Deploy" 버튼만 보인다면:
+                </p>
+                <ol style="line-height: 2; margin-left: 1.5rem;">
+                    <li>Publish 탭 클릭</li>
+                    <li><strong>"Deploy"</strong> 또는 <strong>"Publish"</strong> 버튼 클릭</li>
+                    <li>배포 완료까지 대기 (보통 1-3분)</li>
+                    <li>배포 완료 후 URL 표시됨</li>
+                    <li>URL 복사 후 접속</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- URL 형식 비교 -->
+        <div class="card">
+            <h2 style="color: #2563eb; margin-bottom: 1.5rem;">
+                <i class="fas fa-balance-scale"></i> URL 형식 비교
+            </h2>
+            
+            <div style="display: grid; gap: 1rem;">
+                <div style="background: #fee2e2; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #ef4444;">
+                    <h3 style="color: #991b1b; margin-bottom: 0.5rem;">
+                        ❌ 잘못된 예시 (작동하지 않음)
+                    </h3>
+                    <div class="code-box" style="background: #7f1d1d; color: white;">
+https://your-site.genspark.app
+https://my-project.genspark.app
+https://example.genspark.app
+                    </div>
+                    <p style="color: #991b1b; margin-top: 0.5rem;">
+                        👆 이런 URL은 <strong>예시일 뿐</strong>입니다. 실제로 작동하지 않습니다!
+                    </p>
+                </div>
+
+                <div style="background: #d1fae5; padding: 1.5rem; border-radius: 8px; border-left: 4px solid #10b981;">
+                    <h3 style="color: #065f46; margin-bottom: 0.5rem;">
+                        ✅ 올바른 예시 (실제 배포 URL)
+                    </h3>
+                    <div class="code-box" style="background: #065f46; color: white;">
+https://project-7a8b9c0d1e2f3g4h.genspark.app
+https://jochiwon-medicine-delivery-xyz123.genspark.app
+                    </div>
+                    <p style="color: #065f46; margin-top: 0.5rem;">
+                        👆 Publish 탭에서 제공하는 <strong>실제 URL</strong>을 사용해야 합니다!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- DNS 전파 대기 -->
+        <div class="alert-box alert-info">
+            <h2 style="margin-bottom: 1rem;">
+                <i class="fas fa-clock"></i> 방금 배포한 경우
+            </h2>
+            <p style="margin-bottom: 1rem;">
+                배포가 막 완료되었다면 <strong>DNS 전파</strong>를 기다려야 할 수 있습니다:
+            </p>
+            <ul style="line-height: 2; margin-left: 1.5rem;">
+                <li>일반적으로 <strong>1-5분</strong> 정도 소요</li>
+                <li>브라우저 캐시 삭제: <kbd>Ctrl + Shift + Delete</kbd></li>
+                <li>시크릿 모드로 시도: <kbd>Ctrl + Shift + N</kbd></li>
+                <li>5분 후에도 안 되면 배포 URL 재확인</li>
+            </ul>
+        </div>
+
+        <!-- 체크리스트 -->
+        <div class="card" style="background: #f0fdf4; border: 2px solid #86efac;">
+            <h2 style="color: #16a34a; margin-bottom: 1.5rem;">
+                <i class="fas fa-check-square"></i> 배포 URL 확인 체크리스트
+            </h2>
+            
+            <div style="background: white; padding: 1.5rem; border-radius: 8px;">
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    Genspark의 Publish 탭으로 이동했습니다
+                </label>
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    배포 상태가 "완료"로 표시됩니다
+                </label>
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    실제 배포 URL이 표시됩니다 (https://...genspark.app)
+                </label>
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    URL을 복사했습니다 (복사 버튼 클릭)
+                </label>
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    새 탭에서 복사한 URL로 접속했습니다
+                </label>
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    사이트가 정상적으로 로드됩니다 ✅
+                </label>
+            </div>
+        </div>
+
+        <!-- 추가 도움 -->
+        <div class="card">
+            <h2 style="color: #ef4444; margin-bottom: 1.5rem;">
+                <i class="fas fa-life-ring"></i> 여전히 문제가 있다면
+            </h2>
+            
+            <div style="line-height: 2;">
+                <p style="font-weight: bold; margin-bottom: 1rem;">다음을 확인하세요:</p>
+                <ol style="margin-left: 1.5rem;">
+                    <li>
+                        <strong>배포가 실제로 완료되었는지</strong> 확인
+                        <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+                            <li>Publish 탭에서 "Deployment successful" 메시지</li>
+                            <li>URL이 표시되어 있음</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>올바른 URL을 사용하는지</strong> 확인
+                        <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+                            <li>"your-site" 같은 예시 URL이 아닌지</li>
+                            <li>실제 배포 URL을 복사했는지</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>브라우저 캐시</strong> 문제
+                        <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+                            <li>Ctrl + Shift + Delete로 캐시 삭제</li>
+                            <li>시크릿 모드로 접속 시도</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>다시 배포</strong> 시도
+                        <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+                            <li>Publish 탭에서 "Deploy" 버튼 다시 클릭</li>
+                            <li>배포 완료 후 새 URL 확인</li>
+                        </ul>
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- 배포 후 다음 단계 -->
+        <div class="alert-box alert-success">
+            <h2 style="margin-bottom: 1rem;">
+                <i class="fas fa-thumbs-up"></i> 배포 URL로 접속 성공 후
+            </h2>
+            <p style="margin-bottom: 1rem; font-weight: bold;">
+                사이트가 정상적으로 로드되었다면:
+            </p>
+            <ol style="line-height: 2; margin-left: 1.5rem;">
+                <li>
+                    <strong>test.html</strong>로 이동하여 샘플 데이터 추가
+                    <br>
+                    <span style="font-size: 0.9rem; color: #065f46;">
+                    → 배포 DB는 비어있으므로 데이터를 추가해야 합니다
+                    </span>
+                </li>
+                <li>
+                    <strong>포털 페이지</strong>에서 기능 테스트
+                </li>
+                <li>
+                    문제가 있다면 <strong>deployment-troubleshoot.html</strong>로 진단
+                </li>
+            </ol>
+        </div>
+
+        <!-- 유용한 링크 -->
+        <div class="card">
+            <h2 style="color: #2563eb; margin-bottom: 1.5rem;">
+                <i class="fas fa-toolbox"></i> 유용한 도구들
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <a href="db-sync-guide.html" class="btn" style="background: #dc2626; color: white; text-align: center;">
+                    <i class="fas fa-database"></i><br>DB 동기화
+                </a>
+                <a href="deployment-troubleshoot.html" class="btn btn-danger" style="text-align: center;">
+                    <i class="fas fa-stethoscope"></i><br>배포 진단
+                </a>
+                <a href="test.html" class="btn btn-success" style="text-align: center;">
+                    <i class="fas fa-vial"></i><br>샘플 데이터
+                </a>
+                <a href="start.html" class="btn btn-secondary" style="text-align: center;">
+                    <i class="fas fa-home"></i><br>시작 페이지
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/common.js"></script>
+</body>
+</html>

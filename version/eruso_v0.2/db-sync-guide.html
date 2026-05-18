@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 DB 동기화 가이드 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .alert-box {
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            border-left: 4px solid;
+        }
+        .alert-danger {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        .alert-warning {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        .alert-info {
+            background: #dbeafe;
+            border-color: #2563eb;
+            color: #1e40af;
+        }
+        .alert-success {
+            background: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+        .db-box {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        .db-box.active {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+        .code-box {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .step-box {
+            background: #f9fafb;
+            border-left: 4px solid #2563eb;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-pills"></i>
+                조치원 스마트 약배송
+            </a>
+            <div>
+                <a href="start.html" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> 시작 페이지
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding: 2rem 20px; max-width: 1000px;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">
+                <i class="fas fa-sync-alt" style="color: #2563eb;"></i>
+                DB 동기화 가이드
+            </h1>
+            <p style="color: #6b7280; font-size: 1.1rem;">
+                로컬과 배포 환경의 데이터베이스가 다를 때
+            </p>
+        </div>
+
+        <!-- 문제 설명 -->
+        <div class="alert-box alert-danger">
+            <h2 style="margin-bottom: 1rem;">
+                <i class="fas fa-exclamation-circle"></i> 문제: 다른 DB를 사용 중
+            </h2>
+            <p style="margin-bottom: 0.5rem;">
+                <strong>로컬 DB ID:</strong> 2ffad277-fb19-4a57-be62-003ab454a10c-db
+            </p>
+            <p style="margin-bottom: 1rem;">
+                <strong>Cloudflare DB ID:</strong> a4ac0e30-bade-41ae-937e-d36f22ef2478
+            </p>
+            <p style="font-size: 1.1rem; font-weight: bold;">
+                ⚠️ 완전히 다른 데이터베이스를 사용하고 있습니다!
+            </p>
+        </div>
+
+        <!-- 현재 상황 -->
+        <div class="card">
+            <h2 style="color: #ef4444; margin-bottom: 1.5rem;">
+                <i class="fas fa-database"></i> 현재 상황
+            </h2>
+            
+            <div class="db-box active">
+                <h3 style="color: #10b981; margin-bottom: 1rem;">
+                    ✅ 로컬/미리보기 환경
+                </h3>
+                <div class="code-box">
+DB ID: 2ffad277-fb19-4a57-be62-003ab454a10c-db
+상태: 데이터 있음 ✅
+↓
+- 사용자 데이터 ✅
+- 병원/약국 데이터 ✅
+- 처방전 데이터 ✅
+- 배송 정보 ✅
+                </div>
+                <p style="color: #10b981; font-weight: bold;">
+                    👉 test.html에서 추가한 샘플 데이터가 여기에 저장되어 있습니다
+                </p>
+            </div>
+
+            <div class="db-box">
+                <h3 style="color: #ef4444; margin-bottom: 1rem;">
+                    ❌ Cloudflare 배포 환경
+                </h3>
+                <div class="code-box">
+DB ID: a4ac0e30-bade-41ae-937e-d36f22ef2478
+상태: 비어있음 ❌
+↓
+- 사용자 데이터 ❌
+- 병원/약국 데이터 ❌
+- 처방전 데이터 ❌
+- 배송 정보 ❌
+                </div>
+                <p style="color: #ef4444; font-weight: bold;">
+                    👉 완전히 새로운 빈 데이터베이스입니다
+                </p>
+            </div>
+        </div>
+
+        <!-- 왜 이런 일이? -->
+        <div class="alert-box alert-info">
+            <h2 style="margin-bottom: 1rem;">
+                <i class="fas fa-question-circle"></i> 왜 이런 일이 발생하나요?
+            </h2>
+            <p style="margin-bottom: 1rem;">
+                <strong>Genspark는 환경별로 별도의 데이터베이스를 생성합니다:</strong>
+            </p>
+            <ul style="margin-left: 1.5rem; line-height: 2;">
+                <li>
+                    <strong>개발/미리보기 환경</strong> 
+                    → 개발용 DB (2ffad277...)
+                    <br>
+                    <span style="color: #6b7280; font-size: 0.9rem;">
+                    여기서 테스트하고 샘플 데이터를 추가하는 곳
+                    </span>
+                </li>
+                <li>
+                    <strong>프로덕션/배포 환경</strong> 
+                    → 배포용 DB (a4ac0e30...)
+                    <br>
+                    <span style="color: #6b7280; font-size: 0.9rem;">
+                    실제 사용자가 접속하는 배포된 사이트
+                    </span>
+                </li>
+            </ul>
+            <p style="margin-top: 1rem; font-weight: bold; color: #2563eb;">
+                📌 이것은 정상적인 동작입니다! 개발 데이터와 프로덕션 데이터를 분리하는 것이 보안상 더 안전합니다.
+            </p>
+        </div>
+
+        <!-- 해결 방법 -->
+        <div class="card">
+            <h2 style="color: #10b981; margin-bottom: 1.5rem;">
+                <i class="fas fa-wrench"></i> 해결 방법 (3가지)
+            </h2>
+
+            <!-- 방법 1 -->
+            <div class="step-box" style="border-color: #10b981; background: #f0fdf4;">
+                <h3 style="color: #10b981; margin-bottom: 1rem;">
+                    ✅ 방법 1: 배포 환경에서 직접 데이터 추가 (권장)
+                </h3>
+                <p style="margin-bottom: 1rem;">
+                    <strong>가장 간단하고 안전한 방법입니다.</strong>
+                </p>
+                <ol style="margin-left: 1.5rem; line-height: 2;">
+                    <li>
+                        <strong>배포된 사이트</strong>로 이동
+                        <div class="code-box" style="background: #065f46; color: white;">
+https://your-site.genspark.app
+                        </div>
+                    </li>
+                    <li>
+                        <strong>test.html</strong> 페이지 열기
+                        <div class="code-box" style="background: #065f46; color: white;">
+https://your-site.genspark.app/test.html
+                        </div>
+                    </li>
+                    <li>
+                        <strong>"샘플 데이터 추가"</strong> 버튼 클릭
+                    </li>
+                    <li>
+                        성공 메시지 확인 ✅
+                    </li>
+                    <li>
+                        포털 페이지로 이동하여 데이터 확인
+                    </li>
+                </ol>
+                <div style="margin-top: 1rem;">
+                    <p style="font-weight: bold; color: #065f46;">
+                        👍 장점: 간단하고 빠름, 배포 DB에 직접 추가
+                    </p>
+                </div>
+            </div>
+
+            <!-- 방법 2 -->
+            <div class="step-box" style="border-color: #f59e0b; background: #fffbeb;">
+                <h3 style="color: #f59e0b; margin-bottom: 1rem;">
+                    📤 방법 2: CSV 파일로 일괄 등록
+                </h3>
+                <p style="margin-bottom: 1rem;">
+                    <strong>대량의 데이터를 한 번에 추가할 때 유용합니다.</strong>
+                </p>
+                <ol style="margin-left: 1.5rem; line-height: 2;">
+                    <li>
+                        <strong>CSV 파일 준비</strong>
+                        <ul style="margin-left: 1rem; margin-top: 0.5rem;">
+                            <li>sample_hospitals.csv (병원 데이터)</li>
+                            <li>sample_patients.csv (환자 데이터)</li>
+                            <li>또는 직접 작성한 CSV 파일</li>
+                        </ul>
+                    </li>
+                    <li>
+                        <strong>배포된 사이트</strong>의 <code>bulk-upload.html</code> 열기
+                        <div class="code-box" style="background: #92400e; color: white;">
+https://your-site.genspark.app/bulk-upload.html
+                        </div>
+                    </li>
+                    <li>
+                        CSV 파일 업로드 (드래그 앤 드롭)
+                    </li>
+                    <li>
+                        미리보기 확인
+                    </li>
+                    <li>
+                        "일괄 등록 실행" 버튼 클릭
+                    </li>
+                </ol>
+                <div style="margin-top: 1rem;">
+                    <p style="font-weight: bold; color: #92400e;">
+                        👍 장점: 대량 데이터 한 번에 등록 가능
+                    </p>
+                </div>
+            </div>
+
+            <!-- 방법 3 -->
+            <div class="step-box" style="border-color: #2563eb; background: #eff6ff;">
+                <h3 style="color: #2563eb; margin-bottom: 1rem;">
+                    📝 방법 3: 개별 수동 추가
+                </h3>
+                <p style="margin-bottom: 1rem;">
+                    <strong>소량의 데이터를 정확하게 추가할 때 사용합니다.</strong>
+                </p>
+                <ol style="margin-left: 1.5rem; line-height: 2;">
+                    <li>
+                        <strong>배포된 사이트</strong>의 <code>add-data.html</code> 열기
+                        <div class="code-box" style="background: #1e40af; color: white;">
+https://your-site.genspark.app/add-data.html
+                        </div>
+                    </li>
+                    <li>
+                        병원/약국/환자 정보를 하나씩 입력
+                    </li>
+                    <li>
+                        "추가" 버튼으로 저장
+                    </li>
+                    <li>
+                        "데이터 조회" 탭에서 확인
+                    </li>
+                </ol>
+                <div style="margin-top: 1rem;">
+                    <p style="font-weight: bold; color: #1e40af;">
+                        👍 장점: 정확한 데이터 입력, 실시간 확인 가능
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 중요 노트 -->
+        <div class="alert-box alert-warning">
+            <h2 style="margin-bottom: 1rem;">
+                <i class="fas fa-info-circle"></i> 중요: DB 마이그레이션은 불가능
+            </h2>
+            <p style="margin-bottom: 1rem;">
+                <strong>로컬 DB의 데이터를 배포 DB로 직접 이동할 수는 없습니다.</strong>
+            </p>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+                <li>Genspark의 DB는 환경별로 완전히 분리됨</li>
+                <li>보안상의 이유로 직접 마이그레이션 불가</li>
+                <li>대신 <strong>배포 환경에서 직접 데이터를 추가</strong>해야 함</li>
+            </ul>
+            <p style="margin-top: 1rem; font-weight: bold;">
+                💡 따라서 위의 3가지 방법 중 하나를 선택하세요!
+            </p>
+        </div>
+
+        <!-- 단계별 가이드 -->
+        <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+            <h2 style="color: white; margin-bottom: 1.5rem;">
+                <i class="fas fa-route"></i> 추천 단계별 가이드
+            </h2>
+            <div style="background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; line-height: 2;">
+                <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem;">
+                    1️⃣ 배포된 사이트로 이동
+                </p>
+                <p style="margin-left: 1rem; margin-bottom: 1.5rem; opacity: 0.9;">
+                    https://your-site.genspark.app
+                </p>
+
+                <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem;">
+                    2️⃣ test.html 페이지 열기
+                </p>
+                <p style="margin-left: 1rem; margin-bottom: 1.5rem; opacity: 0.9;">
+                    URL 끝에 /test.html 추가
+                </p>
+
+                <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem;">
+                    3️⃣ "샘플 데이터 추가" 클릭
+                </p>
+                <p style="margin-left: 1rem; margin-bottom: 1.5rem; opacity: 0.9;">
+                    자동으로 사용자, 병원, 약국, 처방전 데이터 생성
+                </p>
+
+                <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem;">
+                    4️⃣ 성공 메시지 확인
+                </p>
+                <p style="margin-left: 1rem; margin-bottom: 1.5rem; opacity: 0.9;">
+                    "샘플 데이터가 추가되었습니다" ✅
+                </p>
+
+                <p style="font-size: 1.2rem; font-weight: bold; margin-bottom: 1rem;">
+                    5️⃣ 포털 페이지에서 확인
+                </p>
+                <p style="margin-left: 1rem; opacity: 0.9;">
+                    patient.html, hospital.html 등에서 데이터 확인
+                </p>
+            </div>
+        </div>
+
+        <!-- 확인 체크리스트 -->
+        <div class="card">
+            <h2 style="color: #2563eb; margin-bottom: 1.5rem;">
+                <i class="fas fa-check-circle"></i> 데이터 추가 완료 확인
+            </h2>
+            <p style="margin-bottom: 1rem;">배포된 사이트에서 다음을 확인하세요:</p>
+            <div style="background: #f9fafb; padding: 1.5rem; border-radius: 8px;">
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    <strong>사용자 데이터</strong> - 로그인 가능 (test.html에서 확인)
+                </label>
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    <strong>병원 목록</strong> - hospital.html 또는 admin.html에서 확인
+                </label>
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    <strong>약국 목록</strong> - pharmacy.html 또는 admin.html에서 확인
+                </label>
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    <strong>환자 목록</strong> - patient.html에서 확인
+                </label>
+                <label style="display: block; padding: 0.5rem 0; cursor: pointer;">
+                    <input type="checkbox" style="margin-right: 0.5rem;">
+                    <strong>처방전 데이터</strong> - 포털에서 처방전 목록 확인
+                </label>
+            </div>
+        </div>
+
+        <!-- 추가 도움말 -->
+        <div class="alert-box alert-success">
+            <h2 style="margin-bottom: 1rem;">
+                <i class="fas fa-lightbulb"></i> 추가 도움말
+            </h2>
+            <ul style="margin-left: 1.5rem; line-height: 2;">
+                <li>
+                    <strong>개발 환경</strong>: 자유롭게 테스트하고 실험하는 곳
+                </li>
+                <li>
+                    <strong>배포 환경</strong>: 실제 사용자가 사용하는 프로덕션
+                </li>
+                <li>
+                    <strong>각 환경마다 별도로 데이터를 추가</strong>해야 합니다
+                </li>
+                <li>
+                    이것은 <strong>정상적인 동작</strong>이며, 보안상 더 안전합니다
+                </li>
+            </ul>
+        </div>
+
+        <!-- 유용한 링크 -->
+        <div class="card">
+            <h2 style="color: #f59e0b; margin-bottom: 1.5rem;">
+                <i class="fas fa-link"></i> 유용한 도구들
+            </h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                <a href="test.html" class="btn btn-success" style="text-align: center;">
+                    <i class="fas fa-vial"></i><br>샘플 데이터 추가
+                </a>
+                <a href="add-data.html" class="btn btn-warning" style="text-align: center;">
+                    <i class="fas fa-plus"></i><br>개별 데이터 추가
+                </a>
+                <a href="bulk-upload.html" class="btn btn-primary" style="text-align: center;">
+                    <i class="fas fa-file-upload"></i><br>CSV 일괄 등록
+                </a>
+                <a href="deployment-troubleshoot.html" class="btn btn-danger" style="text-align: center;">
+                    <i class="fas fa-stethoscope"></i><br>배포 문제 진단
+                </a>
+                <a href="start.html" class="btn btn-secondary" style="text-align: center;">
+                    <i class="fas fa-home"></i><br>시작 페이지
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/common.js"></script>
+</body>
+</html>

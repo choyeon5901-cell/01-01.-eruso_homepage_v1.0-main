@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>약국 포털 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-pills"></i>
+                조치원 스마트 약배송
+            </a>
+            <nav class="nav">
+                <div id="notificationContainer"></div>
+                <span id="userInfo" style="color: #f59e0b; font-weight: 600;"></span>
+                <a href="#" id="logoutBtn">로그아웃</a>
+            </nav>
+        </div>
+    </header>
+
+    <main style="padding: 2rem;">
+        <div class="container">
+            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem;">
+                <i class="fas fa-store"></i> 약국 포털
+            </h1>
+
+            <!-- 대시보드 통계 -->
+            <div class="grid grid-4 mb-3">
+                <div class="card" style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="newPrescriptions">0</h3>
+                    <p style="opacity: 0.9;">신규 처방전</p>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="preparingPrescriptions">0</h3>
+                    <p style="opacity: 0.9;">조제중</p>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="deliveringPrescriptions">0</h3>
+                    <p style="opacity: 0.9;">배송중</p>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="completedPrescriptions">0</h3>
+                    <p style="opacity: 0.9;">완료</p>
+                </div>
+            </div>
+
+            <!-- 탭 메뉴 -->
+            <div style="background: white; border-radius: 0.75rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);">
+                <div style="display: flex; border-bottom: 2px solid var(--border-color);">
+                    <button class="tab-btn active" onclick="switchTab('new')" id="newTab">
+                        <i class="fas fa-inbox"></i> 신규 처방전 <span class="badge badge-info" id="newBadge">0</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('preparing')" id="preparingTab">
+                        <i class="fas fa-pills"></i> 조제중 <span class="badge badge-warning" id="preparingBadge">0</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('delivering')" id="deliveringTab">
+                        <i class="fas fa-shipping-fast"></i> 배송중 <span class="badge badge-info" id="deliveringBadge">0</span>
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('completed')" id="completedTab">
+                        <i class="fas fa-check-circle"></i> 완료 <span class="badge badge-success" id="completedBadge">0</span>
+                    </button>
+                </div>
+
+                <!-- 신규 처방전 -->
+                <div id="newContent" class="tab-content active">
+                    <div id="newList"></div>
+                </div>
+
+                <!-- 조제중 -->
+                <div id="preparingContent" class="tab-content">
+                    <div id="preparingList"></div>
+                </div>
+
+                <!-- 배송중 -->
+                <div id="deliveringContent" class="tab-content">
+                    <div id="deliveringList"></div>
+                </div>
+
+                <!-- 완료 -->
+                <div id="completedContent" class="tab-content">
+                    <div id="completedList"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 처방전 상세 모달 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2>처방전 상세 정보</h2>
+                <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+            </div>
+            <div id="prescriptionDetail"></div>
+            <div id="prescriptionActions" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid var(--border-color);"></div>
+        </div>
+    </div>
+
+    <style>
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            background: var(--background);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .prescription-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: box-shadow 0.2s;
+        }
+
+        .prescription-card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+    </style>
+
+    <script src="js/common.js"></script>
+    <script>
+        let pharmacy = null;
+        let prescriptions = [];
+        let deliveries = [];
+        let currentPrescription = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 로그인 확인
+            if (!currentUser || currentUser.role !== 'pharmacy') {
+                alert('약국 계정으로 로그인해주세요.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 알림 패널 추가
+            const notificationBtn = createNotificationPanel();
+            document.getElementById('notificationContainer').appendChild(notificationBtn);
+
+            // 약국 정보 가져오기
+            const pharmacyData = await fetchTableData('pharmacies');
+            if (pharmacyData && pharmacyData.data) {
+                pharmacy = pharmacyData.data.find(p => p.user_id === currentUser.id);
+                if (pharmacy) {
+                    document.getElementById('userInfo').textContent = `${pharmacy.name}`;
+                }
+            }
+
+            // 데이터 로드
+            await loadData();
+            
+            // 30초마다 자동 새로고침
+            setInterval(loadData, 30000);
+        });
+
+        async function loadData() {
+            await loadPrescriptions();
+            await loadDeliveries();
+            updateStats();
+            displayAllLists();
+        }
+
+        async function loadPrescriptions() {
+            const data = await fetchTableData('prescriptions');
+            if (data && data.data) {
+                // 현재 약국의 처방전 (모든 상태 포함) 또는 아직 접수되지 않은 처방전
+                prescriptions = data.data.filter(p => 
+                    p.pharmacy_id === pharmacy?.id || 
+                    (p.pharmacy_id === '' && ['issued', 'received'].includes(p.status))
+                );
+            }
+        }
+
+        async function loadDeliveries() {
+            const data = await fetchTableData('deliveries');
+            if (data && data.data) {
+                // 현재 약국의 배송 정보 또는 처방전 ID로 매칭되는 배송 정보
+                const prescriptionIds = prescriptions.map(p => p.id);
+                deliveries = data.data.filter(d => 
+                    d.pharmacy_id === pharmacy?.id || prescriptionIds.includes(d.prescription_id)
+                );
+            }
+        }
+
+        function updateStats() {
+            const newCount = prescriptions.filter(p => p.status === 'issued' || p.status === 'received').length;
+            const preparingCount = prescriptions.filter(p => p.status === 'preparing').length;
+            const deliveringCount = prescriptions.filter(p => p.status === 'delivering').length;
+            const completedCount = prescriptions.filter(p => p.status === 'completed').length;
+
+            document.getElementById('newPrescriptions').textContent = newCount;
+            document.getElementById('preparingPrescriptions').textContent = preparingCount;
+            document.getElementById('deliveringPrescriptions').textContent = deliveringCount;
+            document.getElementById('completedPrescriptions').textContent = completedCount;
+
+            document.getElementById('newBadge').textContent = newCount;
+            document.getElementById('preparingBadge').textContent = preparingCount;
+            document.getElementById('deliveringBadge').textContent = deliveringCount;
+            document.getElementById('completedBadge').textContent = completedCount;
+        }
+
+        function switchTab(tab) {
+            // 탭 버튼 활성화
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${tab}Tab`).classList.add('active');
+
+            // 탭 컨텐츠 활성화
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tab}Content`).classList.add('active');
+        }
+
+        function displayAllLists() {
+            displayPrescriptionList('new', ['issued', 'received']);
+            displayPrescriptionList('preparing', ['preparing']);
+            displayPrescriptionList('delivering', ['delivering']);
+            displayPrescriptionList('completed', ['completed']);
+        }
+
+        function displayPrescriptionList(listId, statuses) {
+            const container = document.getElementById(`${listId}List`);
+            const filtered = prescriptions.filter(p => statuses.includes(p.status));
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center p-3" style="color: #6b7280;">
+                        <i class="fas fa-prescription" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        <p>처방전이 없습니다.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 최신순으로 정렬
+            const sorted = [...filtered].sort((a, b) => 
+                new Date(b.issued_at) - new Date(a.issued_at)
+            );
+
+            let html = '';
+            sorted.forEach(prescription => {
+                const delivery = deliveries.find(d => d.prescription_id === prescription.id);
+                
+                html += `
+                    <div class="prescription-card">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 1rem;">
+                            <div>
+                                <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">
+                                    처방전 #${prescription.id.substring(0, 8).toUpperCase()}
+                                </h3>
+                                <span class="badge ${getStatusBadgeClass(prescription.status)}">${getStatusText(prescription.status)}</span>
+                            </div>
+                            <div style="text-align: right; color: #6b7280; font-size: 0.875rem;">
+                                ${formatDate(prescription.issued_at)}
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; gap: 0.5rem; margin-bottom: 1rem; color: #374151;">
+                            <div><strong>환자:</strong> ${prescription.patient_name}</div>
+                            <div><strong>병원:</strong> ${prescription.hospital_name}</div>
+                            <div><strong>담당 의사:</strong> ${prescription.doctor_name}</div>
+                            <div><strong>진단명:</strong> ${prescription.diagnosis}</div>
+                            ${delivery ? `<div><strong>배송 주소:</strong> ${delivery.delivery_address}</div>` : ''}
+                        </div>
+
+                        <button class="btn btn-primary" onclick="viewDetail('${prescription.id}')">
+                            <i class="fas fa-eye"></i> 상세보기 및 처리
+                        </button>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        async function viewDetail(prescriptionId) {
+            const prescription = prescriptions.find(p => p.id === prescriptionId);
+            if (!prescription) return;
+
+            currentPrescription = prescription;
+
+            const delivery = deliveries.find(d => d.prescription_id === prescriptionId);
+
+            let medicines = [];
+            try {
+                medicines = JSON.parse(prescription.medicines || '[]');
+            } catch (e) {
+                console.error('약물 정보 파싱 오류:', e);
+            }
+
+            let html = `
+                <div style="display: grid; gap: 1.5rem;">
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color);">
+                            처방전 정보
+                        </h3>
+                        <div style="display: grid; gap: 0.75rem;">
+                            <div><strong>처방전 번호:</strong> ${prescription.id.substring(0, 8).toUpperCase()}</div>
+                            <div><strong>환자명:</strong> ${prescription.patient_name}</div>
+                            <div><strong>병원:</strong> ${prescription.hospital_name}</div>
+                            <div><strong>담당 의사:</strong> ${prescription.doctor_name}</div>
+                            <div><strong>진단명:</strong> ${prescription.diagnosis}</div>
+                            <div><strong>발행일:</strong> ${formatDate(prescription.issued_at)}</div>
+                            <div><strong>상태:</strong> <span class="badge ${getStatusBadgeClass(prescription.status)}">${getStatusText(prescription.status)}</span></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color);">
+                            처방 약물
+                        </h3>
+            `;
+
+            if (medicines.length > 0) {
+                html += '<table class="table"><thead><tr><th>약품명</th><th>용법</th><th>일수</th></tr></thead><tbody>';
+                medicines.forEach(med => {
+                    html += `<tr>
+                        <td>${med.name}</td>
+                        <td>${med.dosage}</td>
+                        <td>${med.days}일</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+            } else {
+                html += '<p style="color: #6b7280;">약물 정보가 없습니다.</p>';
+            }
+
+            html += '</div>';
+
+            if (prescription.notes) {
+                html += `
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color);">
+                            특이사항
+                        </h3>
+                        <p>${prescription.notes}</p>
+                    </div>
+                `;
+            }
+
+            if (delivery) {
+                html += `
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color);">
+                            배송 정보
+                        </h3>
+                        <div style="display: grid; gap: 0.75rem;">
+                            <div><strong>배송 주소:</strong> ${delivery.delivery_address}</div>
+                            <div><strong>수령인:</strong> ${delivery.recipient_name}</div>
+                            <div><strong>연락처:</strong> ${delivery.recipient_phone}</div>
+                            <div><strong>배송 상태:</strong> <span class="badge ${getStatusBadgeClass(delivery.status)}">${getStatusText(delivery.status)}</span></div>
+                            ${delivery.delivery_notes ? `<div><strong>배송 메모:</strong> ${delivery.delivery_notes}</div>` : ''}
+                            ${delivery.qr_code ? `
+                                <div>
+                                    <strong>QR 코드:</strong>
+                                    <div style="margin-top: 0.5rem; padding: 1rem; background: white; border: 1px solid var(--border-color); border-radius: 0.5rem; text-align: center;">
+                                        <canvas id="qrCanvas"></canvas>
+                                        <p style="margin-top: 0.5rem; font-size: 0.875rem; color: #6b7280;">환자가 이 QR 코드로 수령 인증</p>
+                                        <p style="font-size: 0.75rem; color: #9ca3af; font-family: monospace; word-break: break-all;">${delivery.qr_code}</p>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            document.getElementById('prescriptionDetail').innerHTML = html;
+
+            // QR 코드 생성 (캔버스가 있는 경우)
+            if (delivery && delivery.qr_code) {
+                setTimeout(() => {
+                    const canvas = document.getElementById('qrCanvas');
+                    if (canvas) {
+                        QRCode.toCanvas(canvas, delivery.qr_code, {
+                            width: 200,
+                            margin: 2,
+                            color: {
+                                dark: '#000000',
+                                light: '#ffffff'
+                            }
+                        }, function (error) {
+                            if (error) console.error('QR 코드 생성 오류:', error);
+                        });
+                    }
+                }, 100);
+            }
+
+            // 액션 버튼 표시
+            displayActions(prescription, delivery);
+
+            openModal('detailModal');
+        }
+
+        function displayActions(prescription, delivery) {
+            const container = document.getElementById('prescriptionActions');
+            let html = '<div style="display: flex; gap: 1rem; flex-wrap: wrap;">';
+
+            if (prescription.status === 'issued') {
+                html += `<button class="btn btn-primary" onclick="acceptPrescription()">
+                    <i class="fas fa-check"></i> 접수하기
+                </button>`;
+            } else if (prescription.status === 'received') {
+                html += `<button class="btn btn-primary" onclick="startPreparing()">
+                    <i class="fas fa-pills"></i> 조제 시작
+                </button>`;
+            } else if (prescription.status === 'preparing') {
+                html += `<button class="btn btn-secondary" onclick="startDelivery()">
+                    <i class="fas fa-shipping-fast"></i> 배송 시작
+                </button>`;
+            } else if (prescription.status === 'delivering') {
+                html += `<button class="btn btn-secondary" onclick="completeDelivery()">
+                    <i class="fas fa-check-circle"></i> 배송 완료
+                </button>`;
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        async function acceptPrescription() {
+            if (!confirm('처방전을 접수하시겠습니까?')) return;
+
+            const updated = await patchRecord('prescriptions', currentPrescription.id, {
+                status: 'received',
+                pharmacy_id: pharmacy.id
+            });
+
+            if (updated) {
+                // 배송 정보에도 약국 ID 업데이트
+                const delivery = deliveries.find(d => d.prescription_id === currentPrescription.id);
+                if (delivery) {
+                    await patchRecord('deliveries', delivery.id, {
+                        pharmacy_id: pharmacy.id
+                    });
+                }
+
+                // 알림 생성
+                NotificationSystem.notifyPrescriptionStatusChange(
+                    currentPrescription.id,
+                    currentPrescription.patient_name,
+                    'issued',
+                    'received'
+                );
+
+                showAlert('처방전이 접수되었습니다.', 'success');
+                closeModal('detailModal');
+                await loadData();
+            }
+        }
+
+        async function startPreparing() {
+            if (!confirm('조제를 시작하시겠습니까?')) return;
+
+            const updated = await patchRecord('prescriptions', currentPrescription.id, {
+                status: 'preparing'
+            });
+
+            if (updated) {
+                // 알림 생성
+                NotificationSystem.notifyPrescriptionStatusChange(
+                    currentPrescription.id,
+                    currentPrescription.patient_name,
+                    'received',
+                    'preparing'
+                );
+
+                showAlert('조제가 시작되었습니다.', 'success');
+                closeModal('detailModal');
+                await loadData();
+            }
+        }
+
+        async function startDelivery() {
+            if (!confirm('배송을 시작하시겠습니까?')) return;
+
+            const updated = await patchRecord('prescriptions', currentPrescription.id, {
+                status: 'delivering'
+            });
+
+            if (updated) {
+                // QR 코드 생성
+                const qrCodeData = `PRESCRIPTION:${currentPrescription.id}:${Date.now()}`;
+                
+                // 배송 상태 및 QR 코드 업데이트
+                const delivery = deliveries.find(d => d.prescription_id === currentPrescription.id);
+                if (delivery) {
+                    await patchRecord('deliveries', delivery.id, {
+                        status: 'in_transit',
+                        qr_code: qrCodeData
+                    });
+                }
+
+                // 알림 생성
+                NotificationSystem.notifyPrescriptionStatusChange(
+                    currentPrescription.id,
+                    currentPrescription.patient_name,
+                    'preparing',
+                    'delivering'
+                );
+
+                showAlert('배송이 시작되었습니다. QR 코드가 생성되었습니다.', 'success');
+                closeModal('detailModal');
+                await loadData();
+            }
+        }
+
+        async function completeDelivery() {
+            if (!confirm('배송을 완료하시겠습니까?')) return;
+
+            const updated = await patchRecord('prescriptions', currentPrescription.id, {
+                status: 'completed'
+            });
+
+            if (updated) {
+                // 배송 상태 업데이트
+                const delivery = deliveries.find(d => d.prescription_id === currentPrescription.id);
+                if (delivery) {
+                    await patchRecord('deliveries', delivery.id, {
+                        status: 'delivered',
+                        delivered_at: new Date().toISOString()
+                    });
+                }
+
+                // 알림 생성
+                NotificationSystem.notifyPrescriptionStatusChange(
+                    currentPrescription.id,
+                    currentPrescription.patient_name,
+                    'delivering',
+                    'completed'
+                );
+
+                showAlert('배송이 완료되었습니다.', 'success');
+                closeModal('detailModal');
+                await loadData();
+            }
+        }
+    </script>
+</body>
+</html>

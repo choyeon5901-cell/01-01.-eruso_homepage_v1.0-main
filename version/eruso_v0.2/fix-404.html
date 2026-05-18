@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 API 404 오류 해결 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .error-box {
+            background: #fee2e2;
+            border: 3px solid #ef4444;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        .solution-box {
+            background: white;
+            border-left: 4px solid #10b981;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+        }
+        .code-box {
+            background: #1f2937;
+            color: #10b981;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="padding: 2rem;">
+        <div class="error-box">
+            <h1 style="color: #dc2626; margin-bottom: 1rem;">🚨 API 404 오류</h1>
+            <p style="font-size: 1.2rem; font-weight: bold;">API 응답 오류: 404 Not Found</p>
+            <p style="margin-top: 1rem;">RESTful Table API에 접근할 수 없습니다.</p>
+        </div>
+
+        <div class="card" style="background: #dbeafe; border-left: 4px solid #3b82f6;">
+            <h2 style="color: #1e40af;">📋 문제 원인</h2>
+            <p>이 프로젝트는 <strong>Genspark의 RESTful Table API</strong>를 사용하도록 설계되었습니다.</p>
+            <p>하지만 현재 환경에서는 API에 접근할 수 없습니다:</p>
+            <ul style="margin-left: 1.5rem; line-height: 2;">
+                <li>로컬 파일 시스템에서 실행 중 (file://)</li>
+                <li>API 서버가 실행되지 않음</li>
+                <li>네트워크 연결 문제</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>✅ 해결 방법 1: Genspark 플랫폼에서 배포</h2>
+            <div class="solution-box">
+                <h3 style="color: #10b981; margin-bottom: 0.5rem;">권장 방법</h3>
+                <p>이 프로젝트는 Genspark 플랫폼에서 배포되어야 정상 작동합니다.</p>
+                <ol style="margin-left: 1.5rem; line-height: 2;">
+                    <li>Genspark의 <strong>Publish 탭</strong>으로 이동합니다</li>
+                    <li>"Publish" 버튼을 클릭합니다</li>
+                    <li>배포된 URL에서 프로젝트를 실행합니다</li>
+                    <li>RESTful Table API가 자동으로 연결됩니다</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🔧 해결 방법 2: 로컬 개발 환경 (임시)</h2>
+            <div class="solution-box">
+                <h3 style="color: #f59e0b; margin-bottom: 0.5rem;">⚠️ 임시 해결책</h3>
+                <p>로컬에서 테스트하려면 LocalStorage를 사용하는 버전으로 전환할 수 있습니다.</p>
+                <button class="btn btn-warning" onclick="enableLocalMode()" style="margin-top: 1rem;">
+                    <i class="fas fa-database"></i> 로컬 모드 활성화
+                </button>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: #6b7280;">
+                    ※ 주의: 로컬 모드는 브라우저의 LocalStorage만 사용하며, 실제 API는 사용하지 않습니다.
+                </p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>💻 해결 방법 3: 웹 서버 실행</h2>
+            <div class="solution-box">
+                <h3 style="color: #3b82f6; margin-bottom: 0.5rem;">로컬 웹 서버 사용</h3>
+                <p>file:// 프로토콜 대신 http:// 프로토콜로 실행합니다.</p>
+                
+                <h4 style="margin-top: 1rem;">방법 A: Python 사용</h4>
+                <div class="code-box">
+# Python 3<br>
+python -m http.server 8000<br>
+<br>
+# 또는 Python 2<br>
+python -m SimpleHTTPServer 8000
+                </div>
+                <p>→ 브라우저에서 <code>http://localhost:8000</code> 접속</p>
+
+                <h4 style="margin-top: 1rem;">방법 B: Node.js 사용</h4>
+                <div class="code-box">
+npm install -g http-server<br>
+http-server -p 8000
+                </div>
+
+                <h4 style="margin-top: 1rem;">방법 C: VS Code Live Server</h4>
+                <ol style="margin-left: 1.5rem; line-height: 2;">
+                    <li>VS Code 확장 프로그램 "Live Server" 설치</li>
+                    <li>index.html 우클릭 → "Open with Live Server"</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+            <h2 style="color: #d97706;">⚠️ 중요 안내</h2>
+            <ul style="line-height: 2; margin-left: 1.5rem;">
+                <li>이 프로젝트는 <strong>Genspark 플랫폼용</strong>으로 설계되었습니다</li>
+                <li>로컬에서는 <strong>RESTful Table API가 작동하지 않습니다</strong></li>
+                <li>완전한 기능을 사용하려면 <strong>Publish 탭에서 배포</strong>하세요</li>
+                <li>로컬 테스트는 UI/UX 확인용으로만 사용하세요</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>🎯 추천 워크플로우</h2>
+            <div style="background: #e0e7ff; padding: 1.5rem; border-radius: 0.5rem;">
+                <h3 style="color: #4338ca; margin-bottom: 1rem;">개발 → 배포 순서</h3>
+                <ol style="line-height: 2; margin-left: 1.5rem;">
+                    <li><strong>개발</strong>: 로컬에서 HTML/CSS/JS 작성 및 수정</li>
+                    <li><strong>테스트</strong>: 웹 서버로 UI/UX 확인</li>
+                    <li><strong>배포</strong>: Genspark Publish 탭에서 배포</li>
+                    <li><strong>사용</strong>: 배포된 URL에서 실제 API와 함께 사용</li>
+                </ol>
+            </div>
+        </div>
+
+        <div id="localModeStatus"></div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        function enableLocalMode() {
+            if (!confirm('로컬 모드를 활성화하시겠습니까?\n\n이 모드는 브라우저의 LocalStorage만 사용하며, 실제 API 기능은 제한됩니다.')) {
+                return;
+            }
+
+            // 로컬 모드 플래그 설정
+            localStorage.setItem('localMode', 'true');
+            
+            // 샘플 데이터 생성
+            const sampleData = {
+                users: [
+                    {
+                        id: 'user001',
+                        name: '김환자',
+                        email: 'patient@test.com',
+                        phone: '010-1234-5678',
+                        role: 'patient',
+                        address: '세종특별자치시 조치원읍 123',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    },
+                    {
+                        id: 'user002',
+                        name: '조치원 중앙병원',
+                        email: 'hospital@test.com',
+                        phone: '044-300-1000',
+                        role: 'hospital',
+                        address: '세종특별자치시 조치원읍 456',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    },
+                    {
+                        id: 'user003',
+                        name: '조치원 건강약국',
+                        email: 'pharmacy@test.com',
+                        phone: '044-300-2000',
+                        role: 'pharmacy',
+                        address: '세종특별자치시 조치원읍 789',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    },
+                    {
+                        id: 'user004',
+                        name: '관리자',
+                        email: 'admin@test.com',
+                        phone: '044-300-3000',
+                        role: 'admin',
+                        address: '세종특별자치시 조치원읍',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    }
+                ],
+                hospitals: [],
+                pharmacies: [],
+                prescriptions: [],
+                deliveries: []
+            };
+
+            // 로컬 스토리지에 저장
+            Object.keys(sampleData).forEach(table => {
+                localStorage.setItem(`localData_${table}`, JSON.stringify(sampleData[table]));
+            });
+
+            const statusDiv = document.getElementById('localModeStatus');
+            statusDiv.innerHTML = `
+                <div class="card" style="background: #d1fae5; border-left: 4px solid #10b981; margin-top: 2rem;">
+                    <h2 style="color: #059669;">✅ 로컬 모드 활성화됨!</h2>
+                    <p>샘플 데이터가 LocalStorage에 저장되었습니다.</p>
+                    <p style="margin-top: 1rem;">이제 다음 단계를 진행하세요:</p>
+                    <ol style="margin-left: 1.5rem; line-height: 2;">
+                        <li>페이지를 새로고침합니다</li>
+                        <li>index.html에서 로그인합니다</li>
+                        <li>포털 기능을 테스트합니다</li>
+                    </ol>
+                    <div style="margin-top: 1rem;">
+                        <button class="btn btn-primary" onclick="location.reload()">
+                            <i class="fas fa-sync"></i> 페이지 새로고침
+                        </button>
+                        <button class="btn btn-secondary" onclick="disableLocalMode()">
+                            <i class="fas fa-times"></i> 로컬 모드 비활성화
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function disableLocalMode() {
+            if (confirm('로컬 모드를 비활성화하시겠습니까?')) {
+                localStorage.removeItem('localMode');
+                const tables = ['users', 'hospitals', 'pharmacies', 'prescriptions', 'deliveries'];
+                tables.forEach(table => {
+                    localStorage.removeItem(`localData_${table}`);
+                });
+                location.reload();
+            }
+        }
+
+        // 현재 로컬 모드 상태 확인
+        document.addEventListener('DOMContentLoaded', () => {
+            const isLocalMode = localStorage.getItem('localMode') === 'true';
+            if (isLocalMode) {
+                const statusDiv = document.getElementById('localModeStatus');
+                statusDiv.innerHTML = `
+                    <div class="card" style="background: #e0e7ff; border-left: 4px solid #6366f1; margin-top: 2rem;">
+                        <h2 style="color: #4338ca;">💡 로컬 모드 활성화 중</h2>
+                        <p>현재 LocalStorage를 사용하는 로컬 모드로 실행 중입니다.</p>
+                        <button class="btn btn-secondary" onclick="disableLocalMode()" style="margin-top: 1rem;">
+                            <i class="fas fa-times"></i> 로컬 모드 비활성화
+                        </button>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>

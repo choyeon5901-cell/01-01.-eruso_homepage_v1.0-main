@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>병원 포털 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-pills"></i>
+                조치원 스마트 약배송
+            </a>
+            <nav class="nav">
+                <div id="notificationContainer"></div>
+                <span id="userInfo" style="color: #10b981; font-weight: 600;"></span>
+                <a href="#" id="logoutBtn">로그아웃</a>
+            </nav>
+        </div>
+    </header>
+
+    <main style="padding: 2rem;">
+        <div class="container">
+            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem;">
+                <i class="fas fa-hospital"></i> 병원 포털
+            </h1>
+
+            <!-- 대시보드 통계 -->
+            <div class="grid grid-3 mb-3">
+                <div class="card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="totalPrescriptions">0</h3>
+                    <p style="opacity: 0.9;">총 발행 처방전</p>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="todayPrescriptions">0</h3>
+                    <p style="opacity: 0.9;">오늘 발행</p>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="totalPatients">0</h3>
+                    <p style="opacity: 0.9;">총 환자 수</p>
+                </div>
+            </div>
+
+            <!-- 처방전 발행 -->
+            <div class="card mb-3">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <i class="fas fa-plus-circle"></i> 새 처방전 발행
+                    </div>
+                    <button onclick="openBulkUpload('patient')" class="btn-primary" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; padding: 0.5rem 1rem;">
+                        <i class="fas fa-file-upload"></i> 환자 일괄등록
+                    </button>
+                </div>
+                <form id="prescriptionForm" onsubmit="handlePrescriptionSubmit(event)">
+                    <div class="grid grid-2">
+                        <div class="form-group">
+                            <label class="form-label">환자 선택 *</label>
+                            <select id="patientSelect" class="form-select" required onchange="updatePatientInfo()">
+                                <option value="">환자를 선택하세요</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">담당 의사 *</label>
+                            <input type="text" id="doctorName" class="form-input" placeholder="의사 이름" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">진단명 *</label>
+                        <input type="text" id="diagnosis" class="form-input" placeholder="예: 상기도 감염" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">처방 약물</label>
+                        <div id="medicineList">
+                            <div class="medicine-item grid grid-3 gap-2 mb-2">
+                                <input type="text" class="form-input medicine-name" placeholder="약품명" required>
+                                <input type="text" class="form-input medicine-dosage" placeholder="용법 (예: 1일 3회)" required>
+                                <input type="number" class="form-input medicine-days" placeholder="일수" min="1" required>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline" onclick="addMedicineField()">
+                            <i class="fas fa-plus"></i> 약물 추가
+                        </button>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">특이사항</label>
+                        <textarea id="notes" class="form-textarea" placeholder="복약 지도 및 주의사항"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-file-medical"></i> 처방전 발행
+                    </button>
+                </form>
+            </div>
+
+            <!-- 환자/약국 등록 섹션 -->
+            <div class="card mb-3">
+                <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><i class="fas fa-plus-circle"></i> 환자 / 약국 등록</span>
+                    <button onclick="openBulkUpload('patient-pharmacy')" class="btn-primary" style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; padding: 0.5rem 1rem;">
+                        <i class="fas fa-file-upload"></i> 일괄 등록
+                    </button>
+                </div>
+                <div style="padding: 1.5rem;">
+                    <div class="grid grid-2 gap-2">
+                        <!-- 환자 등록 -->
+                        <div style="padding: 1.5rem; border: 2px solid #3b82f6; border-radius: 0.75rem; background: #eff6ff;">
+                            <h3 style="color: #2563eb; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-user-injured"></i> 환자 등록
+                            </h3>
+                            <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">
+                                새로운 환자를 등록하세요
+                            </p>
+                            <button onclick="openAddDataPage('patient')" class="btn" style="width: 100%; background: #3b82f6; color: white;">
+                                <i class="fas fa-plus"></i> 환자 등록하기
+                            </button>
+                        </div>
+
+                        <!-- 약국 등록 -->
+                        <div style="padding: 1.5rem; border: 2px solid #8b5cf6; border-radius: 0.75rem; background: #f5f3ff;">
+                            <h3 style="color: #8b5cf6; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+                                <i class="fas fa-clinic-medical"></i> 약국 등록
+                            </h3>
+                            <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">
+                                협력 약국을 등록하세요
+                            </p>
+                            <button onclick="openAddDataPage('pharmacy')" class="btn" style="width: 100%; background: #8b5cf6; color: white;">
+                                <i class="fas fa-plus"></i> 약국 등록하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 발행된 처방전 목록 -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-list"></i> 발행된 처방전 목록
+                </div>
+
+                <div id="prescriptionList">
+                    <div class="text-center p-3">
+                        <div class="spinner"></div>
+                        <p>처방전을 불러오는 중...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 처방전 상세 모달 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>처방전 상세 정보</h2>
+                <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+            </div>
+            <div id="prescriptionDetail"></div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        let hospital = null;
+        let patients = [];
+        let prescriptions = [];
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 로그인 확인
+            if (!currentUser || currentUser.role !== 'hospital') {
+                alert('병원 계정으로 로그인해주세요.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 알림 패널 추가
+            const notificationBtn = createNotificationPanel();
+            document.getElementById('notificationContainer').appendChild(notificationBtn);
+
+            // 병원 정보 가져오기
+            const hospitalData = await fetchTableData('hospitals');
+            if (hospitalData && hospitalData.data) {
+                hospital = hospitalData.data.find(h => h.user_id === currentUser.id);
+                if (hospital) {
+                    document.getElementById('userInfo').textContent = `${hospital.name}`;
+                }
+            }
+
+            // 데이터 로드
+            await loadPatients();
+            await loadPrescriptions();
+        });
+
+        async function loadPatients() {
+            const data = await fetchTableData('users');
+            if (data && data.data) {
+                patients = data.data.filter(u => u.role === 'patient' && u.status === 'active');
+                populatePatientSelect();
+            }
+        }
+
+        function populatePatientSelect() {
+            const select = document.getElementById('patientSelect');
+            patients.forEach(patient => {
+                const option = document.createElement('option');
+                option.value = patient.id;
+                option.textContent = `${patient.name} (${patient.phone})`;
+                select.appendChild(option);
+            });
+        }
+
+        function updatePatientInfo() {
+            const patientId = document.getElementById('patientSelect').value;
+            // 환자 정보로 추가 필드를 채울 수 있습니다
+        }
+
+        async function loadPrescriptions() {
+            const data = await fetchTableData('prescriptions');
+            if (data && data.data) {
+                // 현재 병원의 처방전만 필터링
+                prescriptions = data.data.filter(p => p.hospital_id === hospital?.id);
+                updateStats();
+                displayPrescriptions();
+            }
+        }
+
+        function updateStats() {
+            const total = prescriptions.length;
+            const today = new Date().toDateString();
+            const todayCount = prescriptions.filter(p => 
+                new Date(p.issued_at).toDateString() === today
+            ).length;
+            const uniquePatients = new Set(prescriptions.map(p => p.patient_id)).size;
+
+            document.getElementById('totalPrescriptions').textContent = total;
+            document.getElementById('todayPrescriptions').textContent = todayCount;
+            document.getElementById('totalPatients').textContent = uniquePatients;
+        }
+
+        function addMedicineField() {
+            const medicineList = document.getElementById('medicineList');
+            const newField = document.createElement('div');
+            newField.className = 'medicine-item grid grid-3 gap-2 mb-2';
+            newField.innerHTML = `
+                <input type="text" class="form-input medicine-name" placeholder="약품명" required>
+                <input type="text" class="form-input medicine-dosage" placeholder="용법 (예: 1일 3회)" required>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="number" class="form-input medicine-days" placeholder="일수" min="1" required style="flex: 1;">
+                    <button type="button" class="btn btn-danger" style="padding: 0.75rem;" onclick="this.closest('.medicine-item').remove()">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            medicineList.appendChild(newField);
+        }
+
+        async function handlePrescriptionSubmit(event) {
+            event.preventDefault();
+
+            const patientId = document.getElementById('patientSelect').value;
+            const doctorName = document.getElementById('doctorName').value.trim();
+            const diagnosis = document.getElementById('diagnosis').value.trim();
+            const notes = document.getElementById('notes').value.trim();
+
+            const patient = patients.find(p => p.id === patientId);
+
+            // 약물 정보 수집
+            const medicineItems = document.querySelectorAll('.medicine-item');
+            const medicines = [];
+            
+            medicineItems.forEach(item => {
+                const name = item.querySelector('.medicine-name').value.trim();
+                const dosage = item.querySelector('.medicine-dosage').value.trim();
+                const days = item.querySelector('.medicine-days').value.trim();
+                
+                if (name && dosage && days) {
+                    medicines.push({
+                        name: name,
+                        dosage: dosage,
+                        days: parseInt(days)
+                    });
+                }
+            });
+
+            if (medicines.length === 0) {
+                showAlert('최소 1개 이상의 약물을 입력해주세요.', 'warning');
+                return;
+            }
+
+            // 처방전 생성
+            const prescriptionId = generateUUID();
+            const newPrescription = {
+                id: prescriptionId,
+                patient_id: patientId,
+                patient_name: patient.name,
+                hospital_id: hospital.id,
+                hospital_name: hospital.name,
+                doctor_name: doctorName,
+                medicines: JSON.stringify(medicines),
+                diagnosis: diagnosis,
+                notes: notes,
+                status: 'issued',
+                pharmacy_id: '',
+                issued_at: new Date().toISOString(),
+                created_at: new Date().toISOString()
+            };
+
+            const result = await createRecord('prescriptions', newPrescription);
+            if (result) {
+                // 배송 정보도 생성 (환자 주소로 기본 설정)
+                const delivery = {
+                    id: generateUUID(),
+                    prescription_id: prescriptionId,
+                    patient_id: patientId,
+                    pharmacy_id: '',
+                    delivery_address: patient.address,
+                    recipient_name: patient.name,
+                    recipient_phone: patient.phone,
+                    status: 'pending',
+                    delivery_notes: '',
+                    qr_code: '',
+                    delivered_at: null,
+                    created_at: new Date().toISOString()
+                };
+
+                await createRecord('deliveries', delivery);
+
+                // 알림 생성
+                NotificationSystem.notifyPrescriptionStatusChange(
+                    prescriptionId,
+                    patient.name,
+                    '',
+                    'issued'
+                );
+
+                showAlert('처방전이 발행되었습니다.', 'success');
+                document.getElementById('prescriptionForm').reset();
+                
+                // 약물 필드 초기화 (첫 번째만 남기고 삭제)
+                const medicineList = document.getElementById('medicineList');
+                const items = medicineList.querySelectorAll('.medicine-item');
+                items.forEach((item, index) => {
+                    if (index > 0) item.remove();
+                });
+
+                await loadPrescriptions();
+            }
+        }
+
+        function displayPrescriptions() {
+            const container = document.getElementById('prescriptionList');
+            
+            if (prescriptions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center p-3" style="color: #6b7280;">
+                        <i class="fas fa-prescription" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.3;"></i>
+                        <p>발행된 처방전이 없습니다.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 최신순으로 정렬
+            const sorted = [...prescriptions].sort((a, b) => 
+                new Date(b.issued_at) - new Date(a.issued_at)
+            );
+
+            let html = '<div style="overflow-x: auto;"><table class="table"><thead><tr>';
+            html += '<th>처방전 번호</th>';
+            html += '<th>환자명</th>';
+            html += '<th>담당 의사</th>';
+            html += '<th>진단명</th>';
+            html += '<th>발행일</th>';
+            html += '<th>상태</th>';
+            html += '<th>작업</th>';
+            html += '</tr></thead><tbody>';
+
+            sorted.forEach(prescription => {
+                html += `<tr>
+                    <td><strong>${prescription.id.substring(0, 8).toUpperCase()}</strong></td>
+                    <td>${prescription.patient_name}</td>
+                    <td>${prescription.doctor_name}</td>
+                    <td>${prescription.diagnosis}</td>
+                    <td>${formatDateShort(prescription.issued_at)}</td>
+                    <td><span class="badge ${getStatusBadgeClass(prescription.status)}">${getStatusText(prescription.status)}</span></td>
+                    <td>
+                        <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;" onclick="viewDetail('${prescription.id}')">
+                            <i class="fas fa-eye"></i> 상세보기
+                        </button>
+                    </td>
+                </tr>`;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        async function viewDetail(prescriptionId) {
+            const prescription = prescriptions.find(p => p.id === prescriptionId);
+            if (!prescription) return;
+
+            let medicines = [];
+            try {
+                medicines = JSON.parse(prescription.medicines || '[]');
+            } catch (e) {
+                console.error('약물 정보 파싱 오류:', e);
+            }
+
+            let html = `
+                <div style="display: grid; gap: 1.5rem;">
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color);">
+                            처방전 정보
+                        </h3>
+                        <div style="display: grid; gap: 0.75rem;">
+                            <div><strong>처방전 번호:</strong> ${prescription.id.substring(0, 8).toUpperCase()}</div>
+                            <div><strong>환자명:</strong> ${prescription.patient_name}</div>
+                            <div><strong>담당 의사:</strong> ${prescription.doctor_name}</div>
+                            <div><strong>진단명:</strong> ${prescription.diagnosis}</div>
+                            <div><strong>발행일:</strong> ${formatDate(prescription.issued_at)}</div>
+                            <div><strong>상태:</strong> <span class="badge ${getStatusBadgeClass(prescription.status)}">${getStatusText(prescription.status)}</span></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color);">
+                            처방 약물
+                        </h3>
+            `;
+
+            if (medicines.length > 0) {
+                html += '<table class="table"><thead><tr><th>약품명</th><th>용법</th><th>일수</th></tr></thead><tbody>';
+                medicines.forEach(med => {
+                    html += `<tr>
+                        <td>${med.name}</td>
+                        <td>${med.dosage}</td>
+                        <td>${med.days}일</td>
+                    </tr>`;
+                });
+                html += '</tbody></table>';
+            } else {
+                html += '<p style="color: #6b7280;">약물 정보가 없습니다.</p>';
+            }
+
+            html += '</div>';
+
+            if (prescription.notes) {
+                html += `
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color);">
+                            특이사항
+                        </h3>
+                        <p>${prescription.notes}</p>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            document.getElementById('prescriptionDetail').innerHTML = html;
+            openModal('detailModal');
+        }
+
+        // 일괄등록 페이지로 이동
+        function openBulkUpload(type) {
+            window.location.href = 'bulk-upload.html';
+        }
+
+        // 환자/약국 등록 페이지로 이동
+        function openAddDataPage(type) {
+            window.location.href = `add-data.html?tab=${type}&role=hospital`;
+        }
+    </script>
+</body>
+</html>

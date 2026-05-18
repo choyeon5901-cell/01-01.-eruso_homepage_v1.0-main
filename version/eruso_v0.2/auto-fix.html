@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 원클릭 수정 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .big-button {
+            background: white;
+            color: #667eea;
+            padding: 1.5rem 3rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 1rem;
+            cursor: pointer;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
+        .big-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+        }
+        .problem-box {
+            background: #fee2e2;
+            border-left: 4px solid #ef4444;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .solution-box {
+            background: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            transition: width 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="padding: 2rem;">
+        <div class="hero">
+            <h1>🚀 배송 상태 즉시 수정</h1>
+            <p style="font-size: 1.2rem; margin-bottom: 2rem;">
+                원클릭으로 모든 배송 상태를 정상으로 되돌립니다
+            </p>
+            <button class="big-button" onclick="autoFix()">
+                ⚡ 지금 바로 수정하기
+            </button>
+        </div>
+
+        <div class="problem-box">
+            <h3 style="color: #dc2626; margin-bottom: 1rem;">❌ 발견된 문제</h3>
+            <ul style="margin-left: 1.5rem; line-height: 2;">
+                <li>처방전 상태: <strong>완료</strong> ✅</li>
+                <li>배송 상태: <strong style="color: #ef4444;">대기중</strong> ❌ (잘못됨!)</li>
+                <li>예상 상태: <strong style="color: #10b981;">배송완료</strong></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>자동 수정 진행 상황</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar" style="width: 0%;">0%</div>
+            </div>
+            <div id="statusLog" style="margin-top: 1rem; font-family: monospace; font-size: 0.9rem; max-height: 400px; overflow-y: auto;"></div>
+        </div>
+
+        <div class="solution-box" id="successBox" style="display: none;">
+            <h3 style="color: #059669; margin-bottom: 1rem;">✅ 수정 완료!</h3>
+            <p style="margin-bottom: 1rem;">모든 배송 상태가 정상으로 업데이트되었습니다.</p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="window.location.href='patient.html'">
+                    환자 포털에서 확인
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='pharmacy.html'">
+                    약국 포털에서 확인
+                </button>
+                <button class="btn btn-secondary" onclick="location.reload()">
+                    다시 확인
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>수정 내역</h2>
+            <div id="details"></div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        let fixedCount = 0;
+        let totalCount = 0;
+
+        function log(message, color = '#374151') {
+            const logDiv = document.getElementById('statusLog');
+            const time = new Date().toLocaleTimeString('ko-KR');
+            logDiv.innerHTML += `<div style="color: ${color}; margin-bottom: 0.5rem;">[${time}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function updateProgress(current, total) {
+            const percentage = Math.round((current / total) * 100);
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percentage + '%';
+            progressBar.textContent = percentage + '%';
+        }
+
+        async function autoFix() {
+            const detailsDiv = document.getElementById('details');
+            const successBox = document.getElementById('successBox');
+            
+            log('🔍 데이터 확인 시작...', '#2563eb');
+            detailsDiv.innerHTML = '';
+            successBox.style.display = 'none';
+            fixedCount = 0;
+            totalCount = 0;
+
+            try {
+                // 1. 모든 처방전 가져오기
+                log('📋 처방전 데이터 로딩 중...', '#2563eb');
+                const prescriptionsData = await fetchTableData('prescriptions');
+                const prescriptions = prescriptionsData?.data || [];
+                log(`✅ 처방전 ${prescriptions.length}개 발견`, '#10b981');
+
+                // 2. 모든 배송 정보 가져오기
+                log('🚚 배송 정보 데이터 로딩 중...', '#2563eb');
+                const deliveriesData = await fetchTableData('deliveries');
+                const deliveries = deliveriesData?.data || [];
+                log(`✅ 배송 정보 ${deliveries.length}개 발견`, '#10b981');
+
+                // 3. 불일치 찾기
+                log('🔎 상태 불일치 검사 중...', '#2563eb');
+                const mismatches = [];
+
+                for (const p of prescriptions) {
+                    const delivery = deliveries.find(d => d.prescription_id === p.id);
+                    
+                    if (delivery) {
+                        const expectedStatus = getExpectedDeliveryStatus(p.status);
+                        
+                        if (delivery.status !== expectedStatus) {
+                            mismatches.push({
+                                prescription: p,
+                                delivery: delivery,
+                                expectedStatus: expectedStatus
+                            });
+                        }
+                    }
+                }
+
+                totalCount = mismatches.length;
+
+                if (totalCount === 0) {
+                    log('✅ 모든 데이터가 정상입니다!', '#10b981');
+                    detailsDiv.innerHTML = `
+                        <div style="text-align: center; padding: 2rem; color: #10b981;">
+                            <i class="fas fa-check-circle" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                            <h3>모든 배송 상태가 정상입니다!</h3>
+                        </div>
+                    `;
+                    updateProgress(1, 1);
+                    return;
+                }
+
+                log(`⚠️ 불일치 발견: ${totalCount}건`, '#f59e0b');
+
+                // 4. 수정 시작
+                log('🔧 자동 수정 시작...', '#8b5cf6');
+                
+                let detailsHtml = '<table class="table"><thead><tr>';
+                detailsHtml += '<th>처방전 ID</th><th>환자</th><th>이전 상태</th><th>새 상태</th><th>결과</th>';
+                detailsHtml += '</tr></thead><tbody>';
+
+                for (let i = 0; i < mismatches.length; i++) {
+                    const mismatch = mismatches[i];
+                    
+                    try {
+                        log(`📝 [${i + 1}/${totalCount}] ${mismatch.prescription.patient_name} - 수정 중...`, '#6b7280');
+                        
+                        const updateData = {
+                            status: mismatch.expectedStatus
+                        };
+
+                        // delivered 상태면 delivered_at도 업데이트
+                        if (mismatch.expectedStatus === 'delivered' && !mismatch.delivery.delivered_at) {
+                            updateData.delivered_at = new Date().toISOString();
+                        }
+
+                        const result = await patchRecord('deliveries', mismatch.delivery.id, updateData);
+                        
+                        if (result) {
+                            fixedCount++;
+                            log(`✅ [${i + 1}/${totalCount}] 성공: ${mismatch.prescription.patient_name}`, '#10b981');
+                            
+                            detailsHtml += `<tr>
+                                <td>${mismatch.prescription.id.substring(0, 8)}</td>
+                                <td>${mismatch.prescription.patient_name}</td>
+                                <td><span class="badge ${getStatusBadgeClass(mismatch.delivery.status)}">${getStatusText(mismatch.delivery.status)}</span></td>
+                                <td><span class="badge ${getStatusBadgeClass(mismatch.expectedStatus)}">${getStatusText(mismatch.expectedStatus)}</span></td>
+                                <td><span style="color: #10b981;">✅ 성공</span></td>
+                            </tr>`;
+                        } else {
+                            log(`❌ [${i + 1}/${totalCount}] 실패: ${mismatch.prescription.patient_name}`, '#ef4444');
+                            
+                            detailsHtml += `<tr>
+                                <td>${mismatch.prescription.id.substring(0, 8)}</td>
+                                <td>${mismatch.prescription.patient_name}</td>
+                                <td><span class="badge ${getStatusBadgeClass(mismatch.delivery.status)}">${getStatusText(mismatch.delivery.status)}</span></td>
+                                <td>-</td>
+                                <td><span style="color: #ef4444;">❌ 실패</span></td>
+                            </tr>`;
+                        }
+                        
+                        updateProgress(i + 1, totalCount);
+                        
+                    } catch (error) {
+                        log(`❌ [${i + 1}/${totalCount}] 에러: ${error.message}`, '#ef4444');
+                    }
+                }
+
+                detailsHtml += '</tbody></table>';
+                detailsDiv.innerHTML = detailsHtml;
+
+                // 5. 결과 표시
+                log('', '#374151');
+                log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━', '#9ca3af');
+                log(`🎯 최종 결과: ${fixedCount}/${totalCount} 성공`, fixedCount === totalCount ? '#10b981' : '#f59e0b');
+                
+                if (fixedCount > 0) {
+                    successBox.style.display = 'block';
+                }
+
+            } catch (error) {
+                log(`❌ 치명적 에러: ${error.message}`, '#ef4444');
+                console.error(error);
+            }
+        }
+
+        function getExpectedDeliveryStatus(prescriptionStatus) {
+            const statusMap = {
+                'issued': 'pending',
+                'received': 'pending',
+                'preparing': 'pending',
+                'delivering': 'in_transit',
+                'completed': 'delivered',
+                'cancelled': 'failed'
+            };
+            return statusMap[prescriptionStatus] || 'pending';
+        }
+
+        // 페이지 로드 시 자동 확인 (수정은 안 함)
+        document.addEventListener('DOMContentLoaded', async () => {
+            log('👋 배송 상태 자동 수정 도구에 오신 것을 환영합니다!', '#8b5cf6');
+            log('💡 "지금 바로 수정하기" 버튼을 클릭하세요.', '#6b7280');
+        });
+    </script>
+</body>
+</html>

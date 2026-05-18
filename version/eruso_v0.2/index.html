@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>조치원 스마트 약배송 서비스</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-pills"></i>
+                조치원 스마트 약배송
+            </a>
+            <nav class="nav" id="mainNav">
+                <a href="#about">서비스 소개</a>
+                <a href="#features">주요 기능</a>
+                <a href="#contact">문의하기</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <!-- 히어로 섹션 -->
+        <section style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white; padding: 4rem 2rem; text-align: center;">
+            <div class="container">
+                <h1 style="font-size: 3rem; font-weight: 700; margin-bottom: 1.5rem;">
+                    조치원 스마트 약배송 서비스
+                </h1>
+                <p style="font-size: 1.25rem; margin-bottom: 2.5rem; opacity: 0.9;">
+                    처방전 발행부터 약 배송까지, 빠르고 안전한 의약품 배송 시스템
+                </p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button class="btn btn-primary" style="background: white; color: #2563eb; font-size: 1.1rem; padding: 0.875rem 2rem;" onclick="showLoginModal()">
+                        <i class="fas fa-sign-in-alt"></i> 로그인
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- 역할별 포털 소개 -->
+        <section id="features" style="padding: 4rem 2rem; background: white;">
+            <div class="container">
+                <h2 style="text-align: center; font-size: 2.5rem; font-weight: 700; margin-bottom: 3rem;">
+                    역할별 포털
+                </h2>
+                <div class="grid grid-4">
+                    <div class="card" style="text-align: center;">
+                        <div style="font-size: 3rem; color: #2563eb; margin-bottom: 1rem;">
+                            <i class="fas fa-user-injured"></i>
+                        </div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">환자 포털</h3>
+                        <p style="color: #6b7280;">처방전 조회 및 배송 추적</p>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <div style="font-size: 3rem; color: #10b981; margin-bottom: 1rem;">
+                            <i class="fas fa-hospital"></i>
+                        </div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">병원 포털</h3>
+                        <p style="color: #6b7280;">전자 처방전 발행 및 관리</p>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <div style="font-size: 3rem; color: #f59e0b; margin-bottom: 1rem;">
+                            <i class="fas fa-store"></i>
+                        </div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">약국 포털</h3>
+                        <p style="color: #6b7280;">처방전 접수 및 조제, 배송 관리</p>
+                    </div>
+                    <div class="card" style="text-align: center;">
+                        <div style="font-size: 3rem; color: #ef4444; margin-bottom: 1rem;">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">관리자 포털</h3>
+                        <p style="color: #6b7280;">시스템 통계 및 전체 관리</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 서비스 소개 -->
+        <section id="about" style="padding: 4rem 2rem; background: #f9fafb;">
+            <div class="container">
+                <h2 style="text-align: center; font-size: 2.5rem; font-weight: 700; margin-bottom: 3rem;">
+                    주요 기능
+                </h2>
+                <div class="grid grid-3">
+                    <div class="card">
+                        <div style="font-size: 2rem; color: #2563eb; margin-bottom: 1rem;">
+                            <i class="fas fa-prescription"></i>
+                        </div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">전자 처방전</h3>
+                        <p style="color: #6b7280;">병원에서 발행한 전자 처방전을 실시간으로 약국에 전송</p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 2rem; color: #10b981; margin-bottom: 1rem;">
+                            <i class="fas fa-shipping-fast"></i>
+                        </div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">빠른 배송</h3>
+                        <p style="color: #6b7280;">조제 완료 후 신속한 배송 서비스 제공</p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 2rem; color: #f59e0b; margin-bottom: 1rem;">
+                            <i class="fas fa-search-location"></i>
+                        </div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">실시간 추적</h3>
+                        <p style="color: #6b7280;">처방전 상태 및 배송 현황 실시간 확인</p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 2rem; color: #ef4444; margin-bottom: 1rem;">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">안전한 관리</h3>
+                        <p style="color: #6b7280;">의약품 안전 관리 및 보안 시스템</p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 2rem; color: #8b5cf6; margin-bottom: 1rem;">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">통계 관리</h3>
+                        <p style="color: #6b7280;">처방전 및 배송 현황 통계 제공</p>
+                    </div>
+                    <div class="card">
+                        <div style="font-size: 2rem; color: #06b6d4; margin-bottom: 1rem;">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 0.5rem;">모바일 최적화</h3>
+                        <p style="color: #6b7280;">PC와 모바일에서 모두 편리하게 이용</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 문의하기 -->
+        <section id="contact" style="padding: 4rem 2rem; background: white;">
+            <div class="container">
+                <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+                    <h2 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 1.5rem;">
+                        문의하기
+                    </h2>
+                    <p style="color: #6b7280; margin-bottom: 2rem;">
+                        서비스 이용에 궁금한 점이 있으시면 언제든 문의해주세요.
+                    </p>
+                    <div class="card">
+                        <div style="display: flex; flex-direction: column; gap: 1rem; text-align: left;">
+                            <div>
+                                <i class="fas fa-phone" style="color: #2563eb; margin-right: 0.5rem;"></i>
+                                <strong>전화:</strong> 044-300-3000
+                            </div>
+                            <div>
+                                <i class="fas fa-envelope" style="color: #2563eb; margin-right: 0.5rem;"></i>
+                                <strong>이메일:</strong> admin@jochiwon-smartmed.kr
+                            </div>
+                            <div>
+                                <i class="fas fa-map-marker-alt" style="color: #2563eb; margin-right: 0.5rem;"></i>
+                                <strong>주소:</strong> 세종특별자치시 조치원읍
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 푸터 -->
+    <footer style="background: #111827; color: white; padding: 2rem; text-align: center;">
+        <div class="container">
+            <p>&copy; 2026 세종시 조치원 스마트 약배송 서비스. © 2026. 이룸 Co. all rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- 로그인 모달 -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>로그인</h2>
+                <button class="modal-close" onclick="closeModal('loginModal')">&times;</button>
+            </div>
+            <div class="form-group">
+                <label class="form-label">사용자 선택</label>
+                <select id="userSelect" class="form-select">
+                    <option value="">사용자를 선택하세요</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="handleLogin()">로그인</button>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        let users = [];
+
+        // 페이지 로드 시
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 사용자 목록 가져오기
+            const userData = await fetchTableData('users');
+            if (userData && userData.data) {
+                users = userData.data;
+                populateUserSelect();
+            }
+        });
+
+        // 사용자 선택 목록 채우기
+        function populateUserSelect() {
+            const select = document.getElementById('userSelect');
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = `${user.name} (${getRoleText(user.role)})`;
+                select.appendChild(option);
+            });
+        }
+
+        // 역할 한글 변환
+        function getRoleText(role) {
+            const roleMap = {
+                'patient': '환자',
+                'hospital': '병원',
+                'pharmacy': '약국',
+                'admin': '관리자'
+            };
+            return roleMap[role] || role;
+        }
+
+        // 로그인 모달 표시
+        function showLoginModal() {
+            openModal('loginModal');
+        }
+
+        // 로그인 처리
+        async function handleLogin() {
+            const userId = document.getElementById('userSelect').value;
+            if (!userId) {
+                showAlert('사용자를 선택해주세요.', 'warning');
+                return;
+            }
+
+            const user = users.find(u => u.id === userId);
+            if (user) {
+                setCurrentUser(user);
+                
+                // 역할에 따라 페이지 이동
+                switch(user.role) {
+                    case 'patient':
+                        window.location.href = 'patient.html';
+                        break;
+                    case 'hospital':
+                        window.location.href = 'hospital.html';
+                        break;
+                    case 'pharmacy':
+                        window.location.href = 'pharmacy.html';
+                        break;
+                    case 'admin':
+                        window.location.href = 'admin.html';
+                        break;
+                    default:
+                        showAlert('잘못된 사용자 역할입니다.', 'danger');
+                }
+            }
+        }
+    </script>
+</body>
+</html>

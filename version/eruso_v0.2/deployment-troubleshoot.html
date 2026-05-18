@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배포 문제 진단 도구</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        .diagnostic-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .test-result {
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+        .test-result.success {
+            background: #d1fae5;
+            border-color: #10b981;
+            color: #065f46;
+        }
+        .test-result.error {
+            background: #fee2e2;
+            border-color: #ef4444;
+            color: #991b1b;
+        }
+        .test-result.warning {
+            background: #fef3c7;
+            border-color: #f59e0b;
+            color: #92400e;
+        }
+        .code-block {
+            background: #1f2937;
+            color: #f3f4f6;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: monospace;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .info-box {
+            background: #dbeafe;
+            border-left: 4px solid #2563eb;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-pills"></i>
+                조치원 스마트 약배송
+            </a>
+            <div>
+                <a href="start.html" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> 시작 페이지
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="padding: 2rem 20px; max-width: 1000px;">
+        <div style="text-align: center; margin-bottom: 3rem;">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">
+                <i class="fas fa-stethoscope" style="color: #ef4444;"></i>
+                배포 문제 진단 도구
+            </h1>
+            <p style="color: #6b7280; font-size: 1.1rem;">
+                게시 후 미리보기와 다르게 나타나는 문제를 진단합니다
+            </p>
+        </div>
+
+        <!-- 빠른 진단 -->
+        <div class="diagnostic-card">
+            <h2 style="color: #2563eb; margin-bottom: 1.5rem;">
+                <i class="fas fa-bolt"></i> 빠른 진단 실행
+            </h2>
+            <p style="margin-bottom: 1rem;">버튼을 클릭하면 자동으로 문제를 진단합니다.</p>
+            <button class="btn btn-primary btn-lg" onclick="runDiagnostics()">
+                <i class="fas fa-play"></i> 진단 시작
+            </button>
+            <div id="diagnosticResults" style="margin-top: 1.5rem;"></div>
+        </div>
+
+        <!-- 수동 체크리스트 -->
+        <div class="diagnostic-card">
+            <h2 style="color: #10b981; margin-bottom: 1.5rem;">
+                <i class="fas fa-tasks"></i> 수동 체크리스트
+            </h2>
+            
+            <div class="info-box">
+                <h3 style="margin-bottom: 0.5rem;">📋 배포된 사이트에서 확인해야 할 사항</h3>
+                <p>배포된 URL에서 아래 단계를 따라주세요:</p>
+            </div>
+
+            <div style="margin: 1.5rem 0;">
+                <h3 style="margin-bottom: 1rem;">1️⃣ 개발자 도구 열기</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li style="padding: 0.5rem 0;">
+                        <input type="checkbox" id="check1" style="margin-right: 0.5rem;">
+                        <label for="check1">
+                            <strong>F12</strong> 키를 눌러 개발자 도구를 열었습니다
+                        </label>
+                    </li>
+                </ul>
+            </div>
+
+            <div style="margin: 1.5rem 0;">
+                <h3 style="margin-bottom: 1rem;">2️⃣ Console 탭 확인</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li style="padding: 0.5rem 0;">
+                        <input type="checkbox" id="check2" style="margin-right: 0.5rem;">
+                        <label for="check2">
+                            <strong>Console</strong> 탭으로 이동했습니다
+                        </label>
+                    </li>
+                    <li style="padding: 0.5rem 0;">
+                        <input type="checkbox" id="check3" style="margin-right: 0.5rem;">
+                        <label for="check3">
+                            빨간색 에러 메시지가 있는지 확인했습니다
+                        </label>
+                    </li>
+                </ul>
+                
+                <div class="info-box" style="margin-top: 1rem;">
+                    <h4 style="margin-bottom: 0.5rem;">🔴 흔한 에러 메시지:</h4>
+                    <div class="code-block" style="font-size: 0.9rem;">
+❌ 404 Not Found - tables/users
+❌ Failed to fetch
+❌ CORS error
+❌ Cannot read property 'data' of undefined
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin: 1.5rem 0;">
+                <h3 style="margin-bottom: 1rem;">3️⃣ Network 탭 확인</h3>
+                <ul style="list-style: none; padding-left: 0;">
+                    <li style="padding: 0.5rem 0;">
+                        <input type="checkbox" id="check4" style="margin-right: 0.5rem;">
+                        <label for="check4">
+                            <strong>Network</strong> 탭으로 이동했습니다
+                        </label>
+                    </li>
+                    <li style="padding: 0.5rem 0;">
+                        <input type="checkbox" id="check5" style="margin-right: 0.5rem;">
+                        <label for="check5">
+                            페이지를 <strong>새로고침(F5)</strong> 했습니다
+                        </label>
+                    </li>
+                    <li style="padding: 0.5rem 0;">
+                        <input type="checkbox" id="check6" style="margin-right: 0.5rem;">
+                        <label for="check6">
+                            빨간색으로 표시된 실패한 요청을 확인했습니다
+                        </label>
+                    </li>
+                </ul>
+                
+                <div class="info-box" style="margin-top: 1rem;">
+                    <h4 style="margin-bottom: 0.5rem;">🔍 확인해야 할 파일들:</h4>
+                    <ul style="margin-left: 1.5rem;">
+                        <li><code>css/style.css</code> - 스타일시트</li>
+                        <li><code>js/common.js</code> - JavaScript</li>
+                        <li><code>tables/users</code> - 사용자 데이터</li>
+                        <li><code>tables/prescriptions</code> - 처방전 데이터</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 일반적인 문제와 해결 방법 -->
+        <div class="diagnostic-card">
+            <h2 style="color: #f59e0b; margin-bottom: 1.5rem;">
+                <i class="fas fa-exclamation-triangle"></i> 일반적인 문제와 해결 방법
+            </h2>
+
+            <div style="margin: 1.5rem 0; padding: 1.5rem; background: #fef3c7; border-radius: 8px;">
+                <h3 style="color: #92400e; margin-bottom: 1rem;">
+                    ❌ 문제 A: "API 응답 오류: 404 Not Found"
+                </h3>
+                <p style="margin-bottom: 0.5rem;"><strong>증상:</strong> 데이터가 로드되지 않음, 빈 목록</p>
+                <p style="margin-bottom: 0.5rem;"><strong>원인:</strong> RESTful Table API 경로 문제</p>
+                <p style="margin-bottom: 1rem;"><strong>해결:</strong></p>
+                <ol style="margin-left: 1.5rem;">
+                    <li>Publish 탭에서 다시 배포</li>
+                    <li>배포된 URL이 Genspark 도메인인지 확인</li>
+                    <li>외부 호스팅(Vercel, Netlify)에 배포했다면 API가 작동하지 않습니다</li>
+                </ol>
+                <div style="margin-top: 1rem;">
+                    <a href="fix-404.html" class="btn btn-warning">
+                        <i class="fas fa-tools"></i> API 404 오류 해결 도구
+                    </a>
+                </div>
+            </div>
+
+            <div style="margin: 1.5rem 0; padding: 1.5rem; background: #fee2e2; border-radius: 8px;">
+                <h3 style="color: #991b1b; margin-bottom: 1rem;">
+                    ❌ 문제 B: 스타일이 깨짐 (레이아웃 망가짐)
+                </h3>
+                <p style="margin-bottom: 0.5rem;"><strong>증상:</strong> 버튼, 카드, 색상이 이상함</p>
+                <p style="margin-bottom: 0.5rem;"><strong>원인:</strong> CSS 파일을 찾을 수 없음</p>
+                <p style="margin-bottom: 1rem;"><strong>해결:</strong></p>
+                <ol style="margin-left: 1.5rem;">
+                    <li>Network 탭에서 <code>css/style.css</code> 요청 확인</li>
+                    <li>404 에러가 있다면 파일 경로 문제</li>
+                    <li>모든 HTML 파일에서 경로가 <code>href="css/style.css"</code>인지 확인</li>
+                </ol>
+            </div>
+
+            <div style="margin: 1.5rem 0; padding: 1.5rem; background: #dbeafe; border-radius: 8px;">
+                <h3 style="color: #1e40af; margin-bottom: 1rem;">
+                    ❌ 문제 C: 버튼이 작동하지 않음
+                </h3>
+                <p style="margin-bottom: 0.5rem;"><strong>증상:</strong> 클릭해도 반응 없음</p>
+                <p style="margin-bottom: 0.5rem;"><strong>원인:</strong> JavaScript 로드 실패</p>
+                <p style="margin-bottom: 1rem;"><strong>해결:</strong></p>
+                <ol style="margin-left: 1.5rem;">
+                    <li>Console 탭에서 JavaScript 오류 확인</li>
+                    <li>Network 탭에서 <code>js/common.js</code> 로드 확인</li>
+                    <li>브라우저 캐시 삭제 후 재시도 (Ctrl + Shift + Delete)</li>
+                </ol>
+            </div>
+
+            <div style="margin: 1.5rem 0; padding: 1.5rem; background: #d1fae5; border-radius: 8px;">
+                <h3 style="color: #065f46; margin-bottom: 1rem;">
+                    ❌ 문제 D: 데이터가 비어있음
+                </h3>
+                <p style="margin-bottom: 0.5rem;"><strong>증상:</strong> API는 작동하지만 목록이 비어있음</p>
+                <p style="margin-bottom: 0.5rem;"><strong>원인:</strong> 샘플 데이터가 없음</p>
+                <p style="margin-bottom: 1rem;"><strong>해결:</strong></p>
+                <ol style="margin-left: 1.5rem;">
+                    <li><code>test.html</code> 페이지로 이동</li>
+                    <li>"샘플 데이터 추가" 버튼 클릭</li>
+                    <li>포털 페이지로 돌아가서 새로고침</li>
+                </ol>
+                <div style="margin-top: 1rem;">
+                    <a href="test.html" class="btn btn-success">
+                        <i class="fas fa-database"></i> 샘플 데이터 추가하기
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 긴급 지원 -->
+        <div class="diagnostic-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white;">
+            <h2 style="margin-bottom: 1.5rem; color: white;">
+                <i class="fas fa-ambulance"></i> 긴급 지원
+            </h2>
+            <p style="margin-bottom: 1rem; font-size: 1.1rem;">
+                위 방법으로 해결되지 않으면:
+            </p>
+            <ol style="margin-left: 1.5rem; font-size: 1.05rem; line-height: 1.8;">
+                <li><strong>스크린샷 찍기:</strong> 개발자 도구의 Console과 Network 탭</li>
+                <li><strong>URL 확인:</strong> 배포된 사이트의 주소를 복사</li>
+                <li><strong>에러 메시지 복사:</strong> 빨간색 에러 메시지 전체를 복사</li>
+                <li><strong>도움 요청:</strong> 위 정보와 함께 문제 설명</li>
+            </ol>
+        </div>
+
+        <!-- 유용한 도구 링크 -->
+        <div class="diagnostic-card">
+            <h2 style="color: #2563eb; margin-bottom: 1.5rem;">
+                <i class="fas fa-toolbox"></i> 유용한 도구들
+            </h2>
+            <div class="grid grid-3" style="gap: 1rem;">
+                <a href="start.html" class="btn btn-secondary" style="display: block; text-align: center;">
+                    <i class="fas fa-home"></i><br>시작 페이지
+                </a>
+                <a href="test.html" class="btn btn-success" style="display: block; text-align: center;">
+                    <i class="fas fa-vial"></i><br>API 테스트
+                </a>
+                <a href="diagnose.html" class="btn btn-warning" style="display: block; text-align: center;">
+                    <i class="fas fa-stethoscope"></i><br>데이터 진단
+                </a>
+                <a href="fix-404.html" class="btn btn-danger" style="display: block; text-align: center;">
+                    <i class="fas fa-exclamation-triangle"></i><br>404 해결
+                </a>
+                <a href="deploy-guide.html" class="btn btn-primary" style="display: block; text-align: center;">
+                    <i class="fas fa-book"></i><br>배포 가이드
+                </a>
+                <a href="auto-fix.html" class="btn" style="display: block; text-align: center; background: #8b5cf6; color: white;">
+                    <i class="fas fa-magic"></i><br>자동 수정
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function runDiagnostics() {
+            const resultsDiv = document.getElementById('diagnosticResults');
+            resultsDiv.innerHTML = '<div style="text-align: center; padding: 2rem;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #2563eb;"></i><p style="margin-top: 1rem;">진단 중...</p></div>';
+
+            const results = [];
+            
+            // 1. CSS 파일 확인
+            try {
+                const cssResponse = await fetch('css/style.css');
+                if (cssResponse.ok) {
+                    results.push({
+                        type: 'success',
+                        message: '✅ CSS 파일이 정상적으로 로드됩니다 (css/style.css)'
+                    });
+                } else {
+                    results.push({
+                        type: 'error',
+                        message: '❌ CSS 파일을 찾을 수 없습니다 (404 Error) - 스타일이 깨질 수 있습니다'
+                    });
+                }
+            } catch (error) {
+                results.push({
+                    type: 'error',
+                    message: '❌ CSS 파일 로드 실패: ' + error.message
+                });
+            }
+
+            // 2. JavaScript 파일 확인
+            try {
+                const jsResponse = await fetch('js/common.js');
+                if (jsResponse.ok) {
+                    results.push({
+                        type: 'success',
+                        message: '✅ JavaScript 파일이 정상적으로 로드됩니다 (js/common.js)'
+                    });
+                } else {
+                    results.push({
+                        type: 'error',
+                        message: '❌ JavaScript 파일을 찾을 수 없습니다 (404 Error) - 기능이 작동하지 않을 수 있습니다'
+                    });
+                }
+            } catch (error) {
+                results.push({
+                    type: 'error',
+                    message: '❌ JavaScript 파일 로드 실패: ' + error.message
+                });
+            }
+
+            // 3. API 연결 테스트
+            try {
+                const apiResponse = await fetch('tables/users?page=1&limit=1');
+                if (apiResponse.ok) {
+                    const data = await apiResponse.json();
+                    results.push({
+                        type: 'success',
+                        message: `✅ RESTful Table API가 정상 작동합니다 (${data.total || 0}개의 사용자)`
+                    });
+                } else if (apiResponse.status === 404) {
+                    results.push({
+                        type: 'error',
+                        message: '❌ API 404 오류 - Genspark Publish 탭에서 배포해야 합니다!'
+                    });
+                } else {
+                    results.push({
+                        type: 'warning',
+                        message: `⚠️ API 응답 오류: ${apiResponse.status} ${apiResponse.statusText}`
+                    });
+                }
+            } catch (error) {
+                results.push({
+                    type: 'error',
+                    message: '❌ API 연결 실패: ' + error.message + ' - 인터넷 연결을 확인하거나 Publish 탭에서 배포하세요'
+                });
+            }
+
+            // 4. 로컬 스토리지 확인
+            try {
+                const testKey = 'diagnostic_test';
+                localStorage.setItem(testKey, 'test');
+                const testValue = localStorage.getItem(testKey);
+                localStorage.removeItem(testKey);
+                
+                if (testValue === 'test') {
+                    results.push({
+                        type: 'success',
+                        message: '✅ 브라우저 로컬 스토리지가 정상 작동합니다'
+                    });
+                } else {
+                    results.push({
+                        type: 'warning',
+                        message: '⚠️ 로컬 스토리지 문제 - 로그인 정보가 저장되지 않을 수 있습니다'
+                    });
+                }
+            } catch (error) {
+                results.push({
+                    type: 'warning',
+                    message: '⚠️ 로컬 스토리지 사용 불가: ' + error.message
+                });
+            }
+
+            // 5. Font Awesome CDN 확인
+            const fontAwesomeLink = document.querySelector('link[href*="fontawesome"]');
+            if (fontAwesomeLink) {
+                results.push({
+                    type: 'success',
+                    message: '✅ Font Awesome 아이콘 라이브러리가 포함되어 있습니다'
+                });
+            } else {
+                results.push({
+                    type: 'warning',
+                    message: '⚠️ Font Awesome이 없습니다 - 아이콘이 표시되지 않을 수 있습니다'
+                });
+            }
+
+            // 결과 표시
+            let html = '<h3 style="margin-bottom: 1rem;">📊 진단 결과</h3>';
+            
+            const successCount = results.filter(r => r.type === 'success').length;
+            const errorCount = results.filter(r => r.type === 'error').length;
+            const warningCount = results.filter(r => r.type === 'warning').length;
+
+            html += `<div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 150px; padding: 1rem; background: #d1fae5; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; color: #10b981;">${successCount}</div>
+                    <div style="color: #065f46;">정상</div>
+                </div>
+                <div style="flex: 1; min-width: 150px; padding: 1rem; background: #fef3c7; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; color: #f59e0b;">${warningCount}</div>
+                    <div style="color: #92400e;">경고</div>
+                </div>
+                <div style="flex: 1; min-width: 150px; padding: 1rem; background: #fee2e2; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 2rem; color: #ef4444;">${errorCount}</div>
+                    <div style="color: #991b1b;">오류</div>
+                </div>
+            </div>`;
+
+            results.forEach(result => {
+                html += `<div class="test-result ${result.type}">${result.message}</div>`;
+            });
+
+            // 추가 권장사항
+            if (errorCount > 0) {
+                html += `
+                <div style="margin-top: 2rem; padding: 1.5rem; background: #fee2e2; border-radius: 8px; border-left: 4px solid #ef4444;">
+                    <h4 style="color: #991b1b; margin-bottom: 1rem;">🚨 다음 단계:</h4>
+                    <ol style="margin-left: 1.5rem; color: #991b1b;">
+                        <li>위에서 발견된 오류들을 먼저 해결하세요</li>
+                        <li>API 404 오류가 있다면 반드시 <strong>Genspark Publish 탭</strong>에서 배포하세요</li>
+                        <li>파일 경로 오류가 있다면 모든 파일이 올바른 위치에 있는지 확인하세요</li>
+                        <li>문제가 계속되면 브라우저 개발자 도구(F12)의 Console 탭을 확인하세요</li>
+                    </ol>
+                </div>`;
+            } else if (warningCount > 0) {
+                html += `
+                <div style="margin-top: 2rem; padding: 1.5rem; background: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <h4 style="color: #92400e; margin-bottom: 1rem;">⚠️ 주의사항:</h4>
+                    <p style="color: #92400e;">일부 경고가 있지만 기본 기능은 작동할 것입니다. 더 나은 경험을 위해 위의 경고 사항을 확인하세요.</p>
+                </div>`;
+            } else {
+                html += `
+                <div style="margin-top: 2rem; padding: 1.5rem; background: #d1fae5; border-radius: 8px; border-left: 4px solid #10b981;">
+                    <h4 style="color: #065f46; margin-bottom: 1rem;">✅ 모든 검사 통과!</h4>
+                    <p style="color: #065f46;">프로젝트가 정상적으로 배포되었습니다. 미리보기와 다르게 보인다면 브라우저 캐시를 삭제해보세요 (Ctrl + Shift + Delete).</p>
+                </div>`;
+            }
+
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

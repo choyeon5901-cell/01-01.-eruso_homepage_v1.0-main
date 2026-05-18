@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 포털 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-pills"></i>
+                조치원 스마트 약배송
+            </a>
+            <nav class="nav">
+                <div id="notificationContainer"></div>
+                <span id="userInfo" style="color: #ef4444; font-weight: 600;"></span>
+                <a href="#" id="logoutBtn">로그아웃</a>
+            </nav>
+        </div>
+    </header>
+
+    <main style="padding: 2rem;">
+        <div class="container">
+            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 2rem;">
+                <i class="fas fa-user-shield"></i> 슈퍼관리자 대시보드
+            </h1>
+
+            <!-- 전체 통계 -->
+            <div class="grid grid-4 mb-3">
+                <div class="card" style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="totalPrescriptions">0</h3>
+                    <p style="opacity: 0.9;">총 처방전</p>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="totalUsers">0</h3>
+                    <p style="opacity: 0.9;">전체 사용자</p>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="totalHospitals">0</h3>
+                    <p style="opacity: 0.9;">등록 병원</p>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white;">
+                    <h3 style="font-size: 2rem; font-weight: 700;" id="totalPharmacies">0</h3>
+                    <p style="opacity: 0.9;">등록 약국</p>
+                </div>
+            </div>
+
+            <!-- 차트 섹션 -->
+            <div class="grid grid-2 mb-3">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-line"></i> 처방전 상태 분포
+                    </div>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar"></i> 일별 처방전 발행
+                    </div>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 탭 메뉴 -->
+            <div style="background: white; border-radius: 0.75rem; margin-bottom: 1.5rem; box-shadow: var(--shadow);">
+                <div style="display: flex; border-bottom: 2px solid var(--border-color);">
+                    <button class="tab-btn active" onclick="switchTab('prescriptions')" id="prescriptionsTab">
+                        <i class="fas fa-prescription"></i> 처방전 관리
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('users')" id="usersTab">
+                        <i class="fas fa-users"></i> 사용자 관리
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('hospitals')" id="hospitalsTab">
+                        <i class="fas fa-hospital"></i> 병원 관리
+                    </button>
+                    <button class="tab-btn" onclick="switchTab('pharmacies')" id="pharmaciesTab">
+                        <i class="fas fa-store"></i> 약국 관리
+                    </button>
+                </div>
+
+                <!-- 처방전 관리 -->
+                <div id="prescriptionsContent" class="tab-content active">
+                    <div id="prescriptionsList"></div>
+                </div>
+
+                <!-- 사용자 관리 -->
+                <div id="usersContent" class="tab-content">
+                    <div style="padding: 1rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="margin: 0; font-size: 1.125rem; font-weight: 600;">
+                            <i class="fas fa-users"></i> 사용자 목록
+                        </h3>
+                        <button onclick="openBulkUpload('patient')" class="btn-primary" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fas fa-file-upload"></i> 환자 일괄등록
+                        </button>
+                    </div>
+                    <div id="usersList"></div>
+                </div>
+
+                <!-- 병원 관리 -->
+                <div id="hospitalsContent" class="tab-content">
+                    <div id="hospitalsList"></div>
+                </div>
+
+                <!-- 약국 관리 -->
+                <div id="pharmaciesContent" class="tab-content">
+                    <div id="pharmaciesList"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 상세 정보 모달 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="modalTitle">상세 정보</h2>
+                <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+            </div>
+            <div id="detailContent"></div>
+        </div>
+    </div>
+
+    <style>
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .tab-btn:hover {
+            background: var(--background);
+        }
+
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+
+    <script src="js/common.js"></script>
+    <script>
+        let prescriptions = [];
+        let users = [];
+        let hospitals = [];
+        let pharmacies = [];
+        let deliveries = [];
+        
+        let statusChart = null;
+        let dailyChart = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 로그인 확인
+            if (!currentUser || currentUser.role !== 'admin') {
+                alert('관리자 계정으로 로그인해주세요.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // 알림 패널 추가
+            const notificationBtn = createNotificationPanel();
+            document.getElementById('notificationContainer').appendChild(notificationBtn);
+
+            document.getElementById('userInfo').textContent = `${currentUser.name} (관리자)`;
+
+            // 데이터 로드
+            await loadAllData();
+        });
+
+        async function loadAllData() {
+            await Promise.all([
+                loadPrescriptions(),
+                loadUsers(),
+                loadHospitals(),
+                loadPharmacies(),
+                loadDeliveries()
+            ]);
+
+            updateStats();
+            initCharts();
+            displayAllTables();
+        }
+
+        async function loadPrescriptions() {
+            const data = await fetchTableData('prescriptions');
+            if (data && data.data) {
+                prescriptions = data.data;
+            }
+        }
+
+        async function loadUsers() {
+            const data = await fetchTableData('users');
+            if (data && data.data) {
+                users = data.data;
+            }
+        }
+
+        async function loadHospitals() {
+            const data = await fetchTableData('hospitals');
+            if (data && data.data) {
+                hospitals = data.data;
+            }
+        }
+
+        async function loadPharmacies() {
+            const data = await fetchTableData('pharmacies');
+            if (data && data.data) {
+                pharmacies = data.data;
+            }
+        }
+
+        async function loadDeliveries() {
+            const data = await fetchTableData('deliveries');
+            if (data && data.data) {
+                deliveries = data.data;
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('totalPrescriptions').textContent = prescriptions.length;
+            document.getElementById('totalUsers').textContent = users.length;
+            document.getElementById('totalHospitals').textContent = hospitals.length;
+            document.getElementById('totalPharmacies').textContent = pharmacies.length;
+        }
+
+        function initCharts() {
+            // 처방전 상태 분포 차트
+            const statusCounts = {
+                '발행됨': prescriptions.filter(p => p.status === 'issued').length,
+                '접수완료': prescriptions.filter(p => p.status === 'received').length,
+                '조제중': prescriptions.filter(p => p.status === 'preparing').length,
+                '배송중': prescriptions.filter(p => p.status === 'delivering').length,
+                '완료': prescriptions.filter(p => p.status === 'completed').length,
+                '취소됨': prescriptions.filter(p => p.status === 'cancelled').length
+            };
+
+            const statusCtx = document.getElementById('statusChart');
+            if (statusChart) statusChart.destroy();
+            
+            statusChart = new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        data: Object.values(statusCounts),
+                        backgroundColor: [
+                            '#3b82f6',
+                            '#f59e0b',
+                            '#8b5cf6',
+                            '#06b6d4',
+                            '#10b981',
+                            '#ef4444'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // 일별 처방전 발행 차트
+            const last7Days = [];
+            const dailyCounts = [];
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' });
+                last7Days.push(dateStr);
+                
+                const count = prescriptions.filter(p => {
+                    const pDate = new Date(p.issued_at);
+                    return pDate.toDateString() === date.toDateString();
+                }).length;
+                dailyCounts.push(count);
+            }
+
+            const dailyCtx = document.getElementById('dailyChart');
+            if (dailyChart) dailyChart.destroy();
+            
+            dailyChart = new Chart(dailyCtx, {
+                type: 'bar',
+                data: {
+                    labels: last7Days,
+                    datasets: [{
+                        label: '처방전 수',
+                        data: dailyCounts,
+                        backgroundColor: '#2563eb'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${tab}Tab`).classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(`${tab}Content`).classList.add('active');
+        }
+
+        function displayAllTables() {
+            displayPrescriptions();
+            displayUsers();
+            displayHospitals();
+            displayPharmacies();
+        }
+
+        function displayPrescriptions() {
+            const container = document.getElementById('prescriptionsList');
+            
+            if (prescriptions.length === 0) {
+                container.innerHTML = '<div class="text-center p-3" style="color: #6b7280;">데이터가 없습니다.</div>';
+                return;
+            }
+
+            const sorted = [...prescriptions].sort((a, b) => new Date(b.issued_at) - new Date(a.issued_at));
+
+            let html = '<div style="overflow-x: auto;"><table class="table"><thead><tr>';
+            html += '<th>처방전 번호</th><th>환자</th><th>병원</th><th>약국</th><th>발행일</th><th>상태</th><th>작업</th>';
+            html += '</tr></thead><tbody>';
+
+            sorted.forEach(p => {
+                html += `<tr>
+                    <td><strong>${p.id.substring(0, 8).toUpperCase()}</strong></td>
+                    <td>${p.patient_name}</td>
+                    <td>${p.hospital_name}</td>
+                    <td>${p.pharmacy_id ? pharmacies.find(ph => ph.id === p.pharmacy_id)?.name || '-' : '-'}</td>
+                    <td>${formatDateShort(p.issued_at)}</td>
+                    <td><span class="badge ${getStatusBadgeClass(p.status)}">${getStatusText(p.status)}</span></td>
+                    <td>
+                        <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.875rem;" onclick="viewPrescriptionDetail('${p.id}')">
+                            <i class="fas fa-eye"></i> 보기
+                        </button>
+                    </td>
+                </tr>`;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function displayUsers() {
+            const container = document.getElementById('usersList');
+            
+            if (users.length === 0) {
+                container.innerHTML = '<div class="text-center p-3" style="color: #6b7280;">데이터가 없습니다.</div>';
+                return;
+            }
+
+            let html = '<div style="overflow-x: auto;"><table class="table"><thead><tr>';
+            html += '<th>이름</th><th>이메일</th><th>전화번호</th><th>역할</th><th>상태</th><th>가입일</th>';
+            html += '</tr></thead><tbody>';
+
+            users.forEach(u => {
+                const roleText = { 'patient': '환자', 'hospital': '병원', 'pharmacy': '약국', 'admin': '관리자' }[u.role] || u.role;
+                html += `<tr>
+                    <td>${u.name}</td>
+                    <td>${u.email}</td>
+                    <td>${u.phone}</td>
+                    <td><span class="badge badge-info">${roleText}</span></td>
+                    <td><span class="badge ${getStatusBadgeClass(u.status)}">${getStatusText(u.status)}</span></td>
+                    <td>${formatDateShort(u.created_at)}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function displayHospitals() {
+            const container = document.getElementById('hospitalsList');
+            
+            if (hospitals.length === 0) {
+                container.innerHTML = '<div class="text-center p-3" style="color: #6b7280;">데이터가 없습니다.</div>';
+                return;
+            }
+
+            let html = '<div style="overflow-x: auto;"><table class="table"><thead><tr>';
+            html += '<th>병원명</th><th>주소</th><th>전화번호</th><th>사업자등록번호</th><th>상태</th><th>등록일</th>';
+            html += '</tr></thead><tbody>';
+
+            hospitals.forEach(h => {
+                html += `<tr>
+                    <td><strong>${h.name}</strong></td>
+                    <td>${h.address}</td>
+                    <td>${h.phone}</td>
+                    <td>${h.license_number}</td>
+                    <td><span class="badge ${getStatusBadgeClass(h.status)}">${getStatusText(h.status)}</span></td>
+                    <td>${formatDateShort(h.created_at)}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        function displayPharmacies() {
+            const container = document.getElementById('pharmaciesList');
+            
+            if (pharmacies.length === 0) {
+                container.innerHTML = '<div class="text-center p-3" style="color: #6b7280;">데이터가 없습니다.</div>';
+                return;
+            }
+
+            let html = '<div style="overflow-x: auto;"><table class="table"><thead><tr>';
+            html += '<th>약국명</th><th>주소</th><th>전화번호</th><th>사업자등록번호</th><th>상태</th><th>등록일</th>';
+            html += '</tr></thead><tbody>';
+
+            pharmacies.forEach(p => {
+                html += `<tr>
+                    <td><strong>${p.name}</strong></td>
+                    <td>${p.address}</td>
+                    <td>${p.phone}</td>
+                    <td>${p.license_number}</td>
+                    <td><span class="badge ${getStatusBadgeClass(p.status)}">${getStatusText(p.status)}</span></td>
+                    <td>${formatDateShort(p.created_at)}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table></div>';
+            container.innerHTML = html;
+        }
+
+        async function viewPrescriptionDetail(prescriptionId) {
+            const prescription = prescriptions.find(p => p.id === prescriptionId);
+            if (!prescription) return;
+
+            const delivery = deliveries.find(d => d.prescription_id === prescriptionId);
+
+            let medicines = [];
+            try {
+                medicines = JSON.parse(prescription.medicines || '[]');
+            } catch (e) {
+                console.error('약물 정보 파싱 오류:', e);
+            }
+
+            document.getElementById('modalTitle').textContent = '처방전 상세 정보';
+
+            let html = `
+                <div style="display: grid; gap: 1.5rem;">
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color);">
+                            기본 정보
+                        </h3>
+                        <div style="display: grid; gap: 0.75rem;">
+                            <div><strong>처방전 번호:</strong> ${prescription.id}</div>
+                            <div><strong>환자:</strong> ${prescription.patient_name}</div>
+                            <div><strong>병원:</strong> ${prescription.hospital_name}</div>
+                            <div><strong>담당 의사:</strong> ${prescription.doctor_name}</div>
+                            <div><strong>진단명:</strong> ${prescription.diagnosis}</div>
+                            <div><strong>발행일:</strong> ${formatDate(prescription.issued_at)}</div>
+                            <div><strong>상태:</strong> <span class="badge ${getStatusBadgeClass(prescription.status)}">${getStatusText(prescription.status)}</span></div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color);">
+                            처방 약물
+                        </h3>
+            `;
+
+            if (medicines.length > 0) {
+                html += '<table class="table"><thead><tr><th>약품명</th><th>용법</th><th>일수</th></tr></thead><tbody>';
+                medicines.forEach(med => {
+                    html += `<tr><td>${med.name}</td><td>${med.dosage}</td><td>${med.days}일</td></tr>`;
+                });
+                html += '</tbody></table>';
+            } else {
+                html += '<p style="color: #6b7280;">약물 정보가 없습니다.</p>';
+            }
+
+            html += '</div>';
+
+            if (delivery) {
+                html += `
+                    <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 2px solid var(--border-color);">
+                            배송 정보
+                        </h3>
+                        <div style="display: grid; gap: 0.75rem;">
+                            <div><strong>배송 주소:</strong> ${delivery.delivery_address}</div>
+                            <div><strong>수령인:</strong> ${delivery.recipient_name}</div>
+                            <div><strong>연락처:</strong> ${delivery.recipient_phone}</div>
+                            <div><strong>배송 상태:</strong> <span class="badge ${getStatusBadgeClass(delivery.status)}">${getStatusText(delivery.status)}</span></div>
+                            ${delivery.delivered_at ? `<div><strong>배송 완료:</strong> ${formatDate(delivery.delivered_at)}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            html += '</div>';
+            document.getElementById('detailContent').innerHTML = html;
+            openModal('detailModal');
+        }
+
+        // 일괄등록 페이지로 이동
+        function openBulkUpload(type) {
+            window.location.href = 'bulk-upload.html';
+        }
+    </script>
+</body>
+</html>

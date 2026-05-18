@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테스트 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container" style="padding: 2rem;">
+        <h1>시스템 테스트</h1>
+        
+        <div class="card">
+            <h2>API 연결 테스트</h2>
+            <div id="testResults"></div>
+            <button class="btn btn-primary" onclick="runTests()">테스트 실행</button>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h2>샘플 데이터 추가</h2>
+            <button class="btn btn-success" onclick="addSampleData()">샘플 데이터 추가</button>
+        </div>
+
+        <div class="card" style="margin-top: 2rem;">
+            <h2>로그인 테스트</h2>
+            <select id="userSelect" class="form-select">
+                <option value="">사용자 선택...</option>
+            </select>
+            <button class="btn btn-primary" onclick="testLogin()" style="margin-top: 1rem;">로그인 테스트</button>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        async function runTests() {
+            const resultsDiv = document.getElementById('testResults');
+            resultsDiv.innerHTML = '<div class="spinner"></div><p>테스트 중...</p>';
+            
+            let html = '<div style="font-family: monospace; font-size: 0.875rem;">';
+            
+            // 1. Users 테스트
+            try {
+                const users = await fetchTableData('users');
+                html += `<p>✅ Users: ${users?.data?.length || 0}개</p>`;
+                if (users?.data?.length > 0) {
+                    html += '<ul style="margin-left: 1.5rem; font-size: 0.8rem;">';
+                    users.data.forEach(u => {
+                        html += `<li>${u.name} (${u.role}) - ID: ${u.id.substring(0, 8)}</li>`;
+                    });
+                    html += '</ul>';
+                }
+            } catch (e) {
+                html += `<p>❌ Users 에러: ${e.message}</p>`;
+            }
+            
+            // 2. Hospitals 테스트
+            try {
+                const hospitals = await fetchTableData('hospitals');
+                html += `<p>✅ Hospitals: ${hospitals?.data?.length || 0}개</p>`;
+            } catch (e) {
+                html += `<p>❌ Hospitals 에러: ${e.message}</p>`;
+            }
+            
+            // 3. Pharmacies 테스트
+            try {
+                const pharmacies = await fetchTableData('pharmacies');
+                html += `<p>✅ Pharmacies: ${pharmacies?.data?.length || 0}개</p>`;
+            } catch (e) {
+                html += `<p>❌ Pharmacies 에러: ${e.message}</p>`;
+            }
+            
+            // 4. Prescriptions 테스트
+            try {
+                const prescriptions = await fetchTableData('prescriptions');
+                html += `<p>✅ Prescriptions: ${prescriptions?.data?.length || 0}개</p>`;
+                if (prescriptions?.data?.length > 0) {
+                    html += '<ul style="margin-left: 1.5rem; font-size: 0.8rem;">';
+                    prescriptions.data.forEach(p => {
+                        html += `<li>${p.id.substring(0, 8)} - ${p.patient_name} - ${p.status} - 약국: ${p.pharmacy_id ? p.pharmacy_id.substring(0, 8) : '미배정'}</li>`;
+                    });
+                    html += '</ul>';
+                }
+            } catch (e) {
+                html += `<p>❌ Prescriptions 에러: ${e.message}</p>`;
+            }
+            
+            // 5. Deliveries 테스트
+            try {
+                const deliveries = await fetchTableData('deliveries');
+                html += `<p>✅ Deliveries: ${deliveries?.data?.length || 0}개</p>`;
+                if (deliveries?.data?.length > 0) {
+                    html += '<ul style="margin-left: 1.5rem; font-size: 0.8rem;">';
+                    deliveries.data.forEach(d => {
+                        html += `<li>처방전: ${d.prescription_id.substring(0, 8)} - ${d.status} - QR: ${d.qr_code ? '생성됨' : '없음'} - 약국: ${d.pharmacy_id ? d.pharmacy_id.substring(0, 8) : '미배정'}</li>`;
+                    });
+                    html += '</ul>';
+                }
+            } catch (e) {
+                html += `<p>❌ Deliveries 에러: ${e.message}</p>`;
+            }
+            
+            html += '</div>';
+            resultsDiv.innerHTML = html;
+        }
+
+        async function addSampleData() {
+            if (!confirm('샘플 데이터를 추가하시겠습니까?')) return;
+            
+            try {
+                // 사용자 추가
+                const users = [
+                    {
+                        id: 'user001',
+                        name: '김환자',
+                        email: 'patient@test.com',
+                        phone: '010-1234-5678',
+                        role: 'patient',
+                        address: '세종특별자치시 조치원읍 123',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    },
+                    {
+                        id: 'user002',
+                        name: '조치원 중앙병원',
+                        email: 'hospital@test.com',
+                        phone: '044-300-1000',
+                        role: 'hospital',
+                        address: '세종특별자치시 조치원읍 456',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    },
+                    {
+                        id: 'user003',
+                        name: '조치원 건강약국',
+                        email: 'pharmacy@test.com',
+                        phone: '044-300-2000',
+                        role: 'pharmacy',
+                        address: '세종특별자치시 조치원읍 789',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    },
+                    {
+                        id: 'user004',
+                        name: '관리자',
+                        email: 'admin@test.com',
+                        phone: '044-300-3000',
+                        role: 'admin',
+                        address: '세종특별자치시 조치원읍',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    }
+                ];
+
+                for (const user of users) {
+                    try {
+                        await createRecord('users', user);
+                    } catch (e) {
+                        console.log(`User ${user.name} already exists or error:`, e.message);
+                    }
+                }
+
+                // 병원 추가
+                try {
+                    await createRecord('hospitals', {
+                        id: 'hospital001',
+                        name: '조치원 중앙병원',
+                        address: '세종특별자치시 조치원읍 456',
+                        phone: '044-300-1000',
+                        license_number: 'H-2024-001',
+                        user_id: 'user002',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    });
+                } catch (e) {
+                    console.log('Hospital already exists');
+                }
+
+                // 약국 추가
+                try {
+                    await createRecord('pharmacies', {
+                        id: 'pharmacy001',
+                        name: '조치원 건강약국',
+                        address: '세종특별자치시 조치원읍 789',
+                        phone: '044-300-2000',
+                        license_number: 'P-2024-001',
+                        user_id: 'user003',
+                        status: 'active',
+                        created_at: new Date().toISOString()
+                    });
+                } catch (e) {
+                    console.log('Pharmacy already exists');
+                }
+
+                // 처방전 추가
+                const prescriptions = [
+                    {
+                        id: 'presc001',
+                        patient_id: 'user001',
+                        patient_name: '김환자',
+                        hospital_id: 'hospital001',
+                        hospital_name: '조치원 중앙병원',
+                        doctor_name: '김의사',
+                        medicines: JSON.stringify([
+                            { name: '타이레놀 500mg', dosage: '1일 3회, 1회 1정', days: 7 },
+                            { name: '종합감기약', dosage: '1일 3회, 식후 30분', days: 5 }
+                        ]),
+                        diagnosis: '급성 상기도 감염',
+                        notes: '충분한 휴식과 수분 섭취',
+                        status: 'issued',
+                        pharmacy_id: '',
+                        issued_at: new Date().toISOString(),
+                        created_at: new Date().toISOString()
+                    },
+                    {
+                        id: 'presc002',
+                        patient_id: 'user001',
+                        patient_name: '김환자',
+                        hospital_id: 'hospital001',
+                        hospital_name: '조치원 중앙병원',
+                        doctor_name: '이의사',
+                        medicines: JSON.stringify([
+                            { name: '소화제', dosage: '1일 3회, 식전 30분', days: 3 }
+                        ]),
+                        diagnosis: '소화불량',
+                        notes: '자극적인 음식 피하기',
+                        status: 'received',
+                        pharmacy_id: 'pharmacy001',
+                        issued_at: new Date(Date.now() - 86400000).toISOString(),
+                        created_at: new Date(Date.now() - 86400000).toISOString()
+                    }
+                ];
+
+                for (const presc of prescriptions) {
+                    try {
+                        await createRecord('prescriptions', presc);
+                        
+                        // 배송 정보도 추가
+                        await createRecord('deliveries', {
+                            id: 'delivery_' + presc.id,
+                            prescription_id: presc.id,
+                            patient_id: presc.patient_id,
+                            pharmacy_id: presc.pharmacy_id,
+                            delivery_address: '세종특별자치시 조치원읍 123',
+                            recipient_name: '김환자',
+                            recipient_phone: '010-1234-5678',
+                            status: presc.status === 'issued' ? 'pending' : 'in_transit',
+                            delivery_notes: '',
+                            qr_code: presc.status === 'received' ? `PRESCRIPTION:${presc.id}:${Date.now()}` : '',
+                            delivered_at: null,
+                            created_at: presc.created_at
+                        });
+                    } catch (e) {
+                        console.log(`Prescription ${presc.id} already exists`);
+                    }
+                }
+
+                alert('샘플 데이터가 추가되었습니다!');
+                await runTests();
+                await loadUsers();
+            } catch (error) {
+                alert('에러: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        async function loadUsers() {
+            const select = document.getElementById('userSelect');
+            const userData = await fetchTableData('users');
+            
+            select.innerHTML = '<option value="">사용자 선택...</option>';
+            
+            if (userData && userData.data) {
+                userData.data.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = `${user.name} (${user.role})`;
+                    select.appendChild(option);
+                });
+            }
+        }
+
+        function testLogin() {
+            const userId = document.getElementById('userSelect').value;
+            if (!userId) {
+                alert('사용자를 선택하세요');
+                return;
+            }
+
+            fetchTableData('users').then(userData => {
+                const user = userData.data.find(u => u.id === userId);
+                if (user) {
+                    setCurrentUser(user);
+                    alert(`${user.name}님으로 로그인되었습니다. 역할: ${user.role}`);
+                    
+                    // 역할에 따라 페이지 이동
+                    switch(user.role) {
+                        case 'patient':
+                            window.location.href = 'patient.html';
+                            break;
+                        case 'hospital':
+                            window.location.href = 'hospital.html';
+                            break;
+                        case 'pharmacy':
+                            window.location.href = 'pharmacy.html';
+                            break;
+                        case 'admin':
+                            window.location.href = 'admin.html';
+                            break;
+                    }
+                }
+            });
+        }
+
+        // 페이지 로드 시 사용자 목록 불러오기
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUsers();
+        });
+    </script>
+</body>
+</html>

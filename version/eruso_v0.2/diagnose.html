@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 문제 진단 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .status-ok { color: #10b981; font-weight: bold; }
+        .status-error { color: #ef4444; font-weight: bold; }
+        .status-warning { color: #f59e0b; font-weight: bold; }
+        .diagnostic-box {
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        .solution-card {
+            background: white;
+            border-left: 4px solid #3b82f6;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="padding: 2rem;">
+        <h1 style="color: #ef4444;">🔍 데이터 로드 실패 문제 진단</h1>
+        
+        <div class="card" style="background: #fee2e2; border-left: 4px solid #ef4444;">
+            <h2 style="color: #dc2626;">❌ 오류 메시지</h2>
+            <p style="font-size: 1.1rem;">"데이터를 불러오는데 실패했습니다."</p>
+        </div>
+
+        <div class="card">
+            <h2>🔬 자동 진단 시작</h2>
+            <button class="btn btn-primary" onclick="runDiagnostics()" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                <i class="fas fa-play"></i> 진단 시작
+            </button>
+            <div id="diagnosticResults" style="margin-top: 1.5rem;"></div>
+        </div>
+
+        <div id="solutionsContainer"></div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        async function runDiagnostics() {
+            const resultsDiv = document.getElementById('diagnosticResults');
+            const solutionsDiv = document.getElementById('solutionsContainer');
+            
+            resultsDiv.innerHTML = '<div class="spinner"></div><p>진단 중...</p>';
+            solutionsDiv.innerHTML = '';
+            
+            let diagnostics = [];
+            let solutions = [];
+
+            // 1. common.js 로드 확인
+            try {
+                resultsDiv.innerHTML += '<div class="diagnostic-box">✓ 1단계: common.js 로드 확인...</div>';
+                
+                if (typeof fetchTableData === 'function') {
+                    diagnostics.push({ test: 'common.js 로드', status: 'ok', message: '✅ common.js가 정상적으로 로드되었습니다.' });
+                } else {
+                    diagnostics.push({ test: 'common.js 로드', status: 'error', message: '❌ common.js가 로드되지 않았습니다.' });
+                    solutions.push({
+                        title: 'common.js 파일 확인',
+                        steps: [
+                            'js/common.js 파일이 존재하는지 확인하세요.',
+                            '브라우저 개발자 도구(F12) → Console에서 "Uncaught ReferenceError" 확인',
+                            'common.js 파일 경로가 올바른지 확인하세요.'
+                        ]
+                    });
+                }
+            } catch (error) {
+                diagnostics.push({ test: 'common.js 로드', status: 'error', message: `❌ 에러: ${error.message}` });
+            }
+
+            // 2. API 연결 테스트
+            try {
+                resultsDiv.innerHTML += '<div class="diagnostic-box">✓ 2단계: API 연결 테스트...</div>';
+                
+                const testData = await fetch('tables/users?page=1&limit=1');
+                
+                if (testData.ok) {
+                    diagnostics.push({ test: 'API 연결', status: 'ok', message: '✅ API 서버에 정상적으로 연결되었습니다.' });
+                } else {
+                    diagnostics.push({ test: 'API 연결', status: 'error', message: `❌ API 응답 오류: ${testData.status} ${testData.statusText}` });
+                    solutions.push({
+                        title: 'API 서버 문제',
+                        steps: [
+                            '인터넷 연결을 확인하세요.',
+                            '브라우저 콘솔에서 정확한 오류 메시지를 확인하세요.',
+                            'CORS 오류가 있는지 확인하세요.',
+                            '로컬 파일로 열었다면 웹 서버를 통해 열어야 합니다.'
+                        ]
+                    });
+                }
+            } catch (error) {
+                diagnostics.push({ test: 'API 연결', status: 'error', message: `❌ API 연결 실패: ${error.message}` });
+                solutions.push({
+                    title: 'API 연결 실패',
+                    steps: [
+                        '네트워크 연결을 확인하세요.',
+                        'file:// 프로토콜로 열었다면 로컬 서버를 사용하세요.',
+                        '방화벽이나 보안 프로그램이 차단하고 있는지 확인하세요.',
+                        '브라우저 콘솔(F12)에서 네트워크 탭을 확인하세요.'
+                    ]
+                });
+            }
+
+            // 3. 테이블 데이터 확인
+            try {
+                resultsDiv.innerHTML += '<div class="diagnostic-box">✓ 3단계: 데이터베이스 테이블 확인...</div>';
+                
+                const tables = ['users', 'hospitals', 'pharmacies', 'prescriptions', 'deliveries'];
+                let allTablesOk = true;
+                
+                for (const table of tables) {
+                    try {
+                        const data = await fetchTableData(table);
+                        if (data && data.data) {
+                            diagnostics.push({ 
+                                test: `테이블: ${table}`, 
+                                status: 'ok', 
+                                message: `✅ ${table}: ${data.data.length}개 레코드` 
+                            });
+                        } else {
+                            diagnostics.push({ 
+                                test: `테이블: ${table}`, 
+                                status: 'warning', 
+                                message: `⚠️ ${table}: 데이터가 비어있습니다.` 
+                            });
+                            allTablesOk = false;
+                        }
+                    } catch (error) {
+                        diagnostics.push({ 
+                            test: `테이블: ${table}`, 
+                            status: 'error', 
+                            message: `❌ ${table}: ${error.message}` 
+                        });
+                        allTablesOk = false;
+                    }
+                }
+                
+                if (!allTablesOk) {
+                    solutions.push({
+                        title: '데이터가 없거나 접근 불가',
+                        steps: [
+                            'test.html을 열어서 "샘플 데이터 추가" 버튼을 클릭하세요.',
+                            '테이블 스키마가 생성되어 있는지 확인하세요.',
+                            'API 권한 문제가 있는지 확인하세요.'
+                        ]
+                    });
+                }
+            } catch (error) {
+                diagnostics.push({ test: '데이터베이스 확인', status: 'error', message: `❌ ${error.message}` });
+            }
+
+            // 4. 로그인 상태 확인
+            try {
+                resultsDiv.innerHTML += '<div class="diagnostic-box">✓ 4단계: 로그인 상태 확인...</div>';
+                
+                if (currentUser) {
+                    diagnostics.push({ 
+                        test: '로그인 상태', 
+                        status: 'ok', 
+                        message: `✅ ${currentUser.name}(${currentUser.role})로 로그인되어 있습니다.` 
+                    });
+                } else {
+                    diagnostics.push({ 
+                        test: '로그인 상태', 
+                        status: 'warning', 
+                        message: '⚠️ 로그인되어 있지 않습니다.' 
+                    });
+                    solutions.push({
+                        title: '로그인 필요',
+                        steps: [
+                            'index.html에서 로그인하세요.',
+                            '또는 test.html에서 사용자를 선택하고 로그인하세요.'
+                        ]
+                    });
+                }
+            } catch (error) {
+                diagnostics.push({ test: '로그인 상태', status: 'error', message: `❌ ${error.message}` });
+            }
+
+            // 결과 표시
+            displayResults(diagnostics, solutions);
+        }
+
+        function displayResults(diagnostics, solutions) {
+            const resultsDiv = document.getElementById('diagnosticResults');
+            const solutionsDiv = document.getElementById('solutionsContainer');
+            
+            // 진단 결과
+            let html = '<h3 style="margin-top: 2rem; margin-bottom: 1rem;">진단 결과</h3>';
+            
+            diagnostics.forEach(d => {
+                const statusClass = d.status === 'ok' ? 'status-ok' : 
+                                   d.status === 'error' ? 'status-error' : 'status-warning';
+                html += `<div class="diagnostic-box"><span class="${statusClass}">${d.test}</span><br>${d.message}</div>`;
+            });
+            
+            resultsDiv.innerHTML = html;
+
+            // 해결 방법
+            if (solutions.length > 0) {
+                let solutionsHtml = '<div class="card" style="background: #fef3c7; border-left: 4px solid #f59e0b;">';
+                solutionsHtml += '<h2 style="color: #d97706;">💡 해결 방법</h2>';
+                
+                solutions.forEach((solution, index) => {
+                    solutionsHtml += '<div class="solution-card">';
+                    solutionsHtml += `<h3 style="color: #3b82f6; margin-bottom: 1rem;">${index + 1}. ${solution.title}</h3>`;
+                    solutionsHtml += '<ol style="line-height: 2; margin-left: 1.5rem;">';
+                    solution.steps.forEach(step => {
+                        solutionsHtml += `<li>${step}</li>`;
+                    });
+                    solutionsHtml += '</ol>';
+                    solutionsHtml += '</div>';
+                });
+                
+                solutionsHtml += '</div>';
+                solutionsDiv.innerHTML = solutionsHtml;
+            } else {
+                solutionsDiv.innerHTML = `
+                    <div class="card" style="background: #d1fae5; border-left: 4px solid #10b981;">
+                        <h2 style="color: #059669;">✅ 모든 항목이 정상입니다!</h2>
+                        <p>시스템이 정상적으로 작동하고 있습니다.</p>
+                        <p>그래도 문제가 있다면 브라우저 콘솔(F12)을 확인해주세요.</p>
+                    </div>
+                `;
+            }
+
+            // 빠른 수정 버튼
+            solutionsDiv.innerHTML += `
+                <div class="card">
+                    <h2>🚀 빠른 수정</h2>
+                    <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                        <button class="btn btn-success" onclick="window.location.href='test.html'">
+                            <i class="fas fa-database"></i> test.html에서 샘플 데이터 추가
+                        </button>
+                        <button class="btn btn-primary" onclick="window.location.href='index.html'">
+                            <i class="fas fa-sign-in-alt"></i> index.html에서 로그인
+                        </button>
+                        <button class="btn btn-secondary" onclick="location.reload()">
+                            <i class="fas fa-sync"></i> 페이지 새로고침
+                        </button>
+                        <button class="btn btn-secondary" onclick="clearCache()">
+                            <i class="fas fa-trash"></i> 브라우저 캐시 삭제
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function clearCache() {
+            if (confirm('브라우저 캐시를 삭제하고 페이지를 새로고침하시겠습니까?')) {
+                localStorage.clear();
+                sessionStorage.clear();
+                location.reload(true);
+            }
+        }
+
+        // 페이지 로드 시 자동 진단
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('진단 페이지 로드됨');
+            console.log('currentUser:', currentUser);
+            console.log('fetchTableData:', typeof fetchTableData);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗺️ 도구 찾기 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hero {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 1rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .tool-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s;
+        }
+        .tool-card:hover {
+            border-color: #3b82f6;
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.1);
+            transform: translateY(-5px);
+        }
+        .tool-card.featured {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+        .tool-card.featured h2 {
+            color: white;
+        }
+        .big-link {
+            display: inline-block;
+            padding: 1rem 2rem;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+        .big-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .file-path {
+            background: #1f2937;
+            color: #10b981;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: monospace;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="padding: 2rem;">
+        <div class="hero">
+            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">🗺️ 도구 위치 안내</h1>
+            <p style="font-size: 1.2rem;">필요한 도구를 찾아서 바로 실행하세요!</p>
+        </div>
+
+        <!-- 메인 추천 도구 -->
+        <div class="tool-card featured">
+            <h2 style="font-size: 2rem; margin-bottom: 1rem;">⭐ 가장 추천하는 도구</h2>
+            <h3 style="font-size: 1.5rem; margin-bottom: 1rem;">auto-fix.html</h3>
+            <p style="font-size: 1.1rem; margin-bottom: 1.5rem; opacity: 0.9;">
+                배송 상태 문제를 원클릭으로 자동 수정합니다
+            </p>
+            <div class="file-path">
+                📁 프로젝트 폴더 / auto-fix.html
+            </div>
+            <a href="auto-fix.html" class="big-link">
+                ⚡ 지금 바로 열기
+            </a>
+        </div>
+
+        <!-- 전체 파일 구조 -->
+        <div class="card">
+            <h2>📂 전체 파일 구조</h2>
+            <div style="font-family: monospace; line-height: 2; margin-top: 1rem;">
+                <div style="margin-bottom: 1rem;">
+                    <strong style="color: #2563eb;">📁 조치원-스마트-약배송/</strong>
+                </div>
+                
+                <div style="margin-left: 2rem;">
+                    <div style="color: #6b7280;">├── 📄 <a href="index.html" style="color: #3b82f6;">index.html</a> - 메인 페이지</div>
+                    <div style="color: #6b7280;">├── 📄 <a href="patient.html" style="color: #3b82f6;">patient.html</a> - 환자 포털</div>
+                    <div style="color: #6b7280;">├── 📄 <a href="hospital.html" style="color: #3b82f6;">hospital.html</a> - 병원 포털</div>
+                    <div style="color: #6b7280;">├── 📄 <a href="pharmacy.html" style="color: #3b82f6;">pharmacy.html</a> - 약국 포털</div>
+                    <div style="color: #6b7280;">├── 📄 <a href="admin.html" style="color: #3b82f6;">admin.html</a> - 관리자 포털</div>
+                    <div style="color: #6b7280;">│</div>
+                    <div style="color: #10b981; font-weight: bold;">├── 🛠️ <a href="test.html" style="color: #10b981; font-weight: bold;">test.html</a> - 테스트 & 샘플 데이터</div>
+                    <div style="color: #10b981; font-weight: bold;">├── 🛠️ <a href="add-data.html" style="color: #10b981; font-weight: bold;">add-data.html</a> - 🌟 데이터 추가 도구</div>
+                    <div style="color: #f59e0b; font-weight: bold; background: #fef3c7; padding: 0.5rem; border-radius: 0.25rem;">├── 📤 <a href="bulk-upload.html" style="color: #f59e0b; font-weight: bold;">bulk-upload.html</a> - 일괄 등록 도구 (CSV) + 약국 조회</div>
+                    <div style="color: #10b981; font-weight: bold; background: #d1fae5; padding: 0.5rem; border-radius: 0.25rem;">├── ✅ <a href="csv-validator.html" style="color: #059669; font-weight: bold;">csv-validator.html</a> - CSV 검증 도구</div>
+                    <div style="color: #6b7280;">│</div>
+                    <div style="color: #3b82f6;">├── 📊 sample_hospitals.csv - 병원 샘플 데이터 (3건)</div>
+                    <div style="color: #3b82f6;">├── 📊 sample_patients.csv - 환자 샘플 데이터 (5건)</div>
+                    <div style="color: #6b7280;">│</div>
+                    <div style="color: #dc2626; font-weight: bold; background: #fecaca; padding: 0.5rem; border-radius: 0.25rem;">├── 🆕🔥🔥 <a href="db-sync-guide.html" style="color: #991b1b; font-weight: bold;">db-sync-guide.html</a> - DB 동기화 가이드 (로컬↔배포)</div>
+                    <div style="color: #ef4444; font-weight: bold; background: #fee2e2; padding: 0.5rem; border-radius: 0.25rem;">├── 🆕🔥 <a href="deployment-troubleshoot.html" style="color: #dc2626; font-weight: bold;">deployment-troubleshoot.html</a> - 배포 문제 진단</div>
+                    <div style="color: #10b981; font-weight: bold;">├── 🛠️ <a href="verify.html" style="color: #10b981; font-weight: bold;">verify.html</a> - 약국 완료 검증</div>
+                    <div style="color: #10b981; font-weight: bold;">├── 🛠️ <a href="sync.html" style="color: #10b981; font-weight: bold;">sync.html</a> - 동기화 도구</div>
+                    <div style="color: #10b981; font-weight: bold;">├── 🛠️ <a href="fix-delivery.html" style="color: #10b981; font-weight: bold;">fix-delivery.html</a> - 단일 수정</div>
+                    <div style="color: #8b5cf6; font-weight: bold; background: #ede9fe; padding: 0.5rem; border-radius: 0.25rem;">├── ⭐ <a href="auto-fix.html" style="color: #8b5cf6; font-weight: bold;">auto-fix.html</a> - 원클릭 자동 수정 (여기!)</div>
+                    <div style="color: #6b7280;">│</div>
+                    <div style="color: #6b7280;">├── 📁 css/</div>
+                    <div style="color: #6b7280;">├── 📁 js/</div>
+                    <div style="color: #6b7280;">└── 📝 README.md</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 도구별 상세 정보 -->
+        <div class="card">
+            <h2>🛠️ 도구별 기능 및 링크</h2>
+            
+            <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                <!-- db-sync-guide.html -->
+                <div style="border: 4px solid #dc2626; border-radius: 0.5rem; padding: 1rem; background: #fecaca;">
+                    <h3 style="color: #991b1b; margin-bottom: 0.5rem;">
+                        🆕🔥🔥 db-sync-guide.html
+                    </h3>
+                    <p style="margin-bottom: 0.5rem; font-weight: bold; color: #991b1b;">
+                        ⚠️ 로컬과 배포 환경의 DB가 다를 때 (중요!)
+                    </p>
+                    <p style="margin-bottom: 1rem; font-size: 0.9rem;">
+                        로컬에서는 데이터가 보이는데 배포 사이트에서는 안 보이는 이유와 해결 방법
+                    </p>
+                    <a href="db-sync-guide.html" class="btn" style="background: #dc2626; color: white;">
+                        <i class="fas fa-external-link-alt"></i> 열기
+                    </a>
+                </div>
+
+                <!-- deployment-troubleshoot.html -->
+                <div style="border: 3px solid #ef4444; border-radius: 0.5rem; padding: 1rem; background: #fee2e2;">
+                    <h3 style="color: #dc2626; margin-bottom: 0.5rem;">
+                        🆕🔥 deployment-troubleshoot.html
+                    </h3>
+                    <p style="margin-bottom: 1rem;">게시 후 미리보기와 다르게 나타나는 문제를 자동으로 진단</p>
+                    <a href="deployment-troubleshoot.html" class="btn" style="background: #ef4444; color: white;">
+                        <i class="fas fa-external-link-alt"></i> 열기
+                    </a>
+                </div>
+
+                <!-- auto-fix.html -->
+                <div style="border: 3px solid #8b5cf6; border-radius: 0.5rem; padding: 1rem; background: #f5f3ff;">
+                    <h3 style="color: #8b5cf6; margin-bottom: 0.5rem;">
+                        ⭐ auto-fix.html
+                    </h3>
+                    <p style="margin-bottom: 1rem;">배송 상태 문제를 원클릭으로 자동 수정</p>
+                    <a href="auto-fix.html" class="btn btn-primary">
+                        <i class="fas fa-external-link-alt"></i> 열기
+                    </a>
+                </div>
+
+                <!-- test.html -->
+                <div style="border: 2px solid #10b981; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="color: #10b981; margin-bottom: 0.5rem;">
+                        🧪 test.html
+                    </h3>
+                    <p style="margin-bottom: 1rem;">API 테스트 및 샘플 데이터 생성</p>
+                    <a href="test.html" class="btn btn-success">
+                        <i class="fas fa-external-link-alt"></i> 열기
+                    </a>
+                </div>
+
+                <!-- add-data.html -->
+                <div style="border: 2px solid #f59e0b; border-radius: 0.5rem; padding: 1rem; background: #fffbeb;">
+                    <h3 style="color: #d97706; margin-bottom: 0.5rem;">
+                        🌟 add-data.html
+                    </h3>
+                    <p style="margin-bottom: 1rem;">병원, 약국, 환자 정보를 쉽게 추가하고 관리</p>
+                    <a href="add-data.html" class="btn" style="background: #f59e0b; color: white;">
+                        <i class="fas fa-external-link-alt"></i> 열기
+                    </a>
+                </div>
+
+                <!-- bulk-upload.html -->
+                <div style="border: 3px solid #f59e0b; border-radius: 0.5rem; padding: 1rem; background: #fef3c7;">
+                    <h3 style="color: #d97706; margin-bottom: 0.5rem;">
+                        📤 bulk-upload.html
+                    </h3>
+                    <p style="margin-bottom: 0.5rem;">CSV 파일로 병원, 약국, 환자 정보를 대량으로 등록</p>
+                    <p style="margin-bottom: 1rem; font-size: 0.9rem; color: #8b5cf6;">
+                        <strong>🆕 약국 데이터 조회:</strong> 등록된 약국 목록을 실시간으로 확인할 수 있습니다
+                    </p>
+                    <p style="margin-bottom: 1rem; font-size: 0.9rem; color: #059669;">
+                        <strong>📍 포털 진입:</strong> 관리자/병원 포털에서 "환자 일괄등록" 버튼 클릭
+                    </p>
+                    <a href="bulk-upload.html" class="btn" style="background: #f59e0b; color: white;">
+                        <i class="fas fa-external-link-alt"></i> 열기
+                    </a>
+                </div>
+
+                <!-- csv-validator.html -->
+                <div style="border: 2px solid #10b981; border-radius: 0.5rem; padding: 1rem; background: #d1fae5;">
+                    <h3 style="color: #059669; margin-bottom: 0.5rem;">
+                        ✅ csv-validator.html
+                    </h3>
+                    <p style="margin-bottom: 1rem;">업로드 전 CSV 파일의 오류를 미리 확인하고 수정</p>
+                    <a href="csv-validator.html" class="btn" style="background: #10b981; color: white;">
+                        <i class="fas fa-external-link-alt"></i> 열기
+                    </a>
+                </div>
+
+                <!-- verify.html -->
+                <div style="border: 2px solid #3b82f6; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="color: #3b82f6; margin-bottom: 0.5rem;">
+                        ✅ verify.html
+                    </h3>
+                    <p style="margin-bottom: 1rem;">약국 완료 건수 검증 및 테스트 데이터 생성</p>
+                    <a href="verify.html" class="btn btn-primary">
+                        <i class="fas fa-external-link-alt"></i> 열기
+                    </a>
+                </div>
+
+                <!-- sync.html -->
+                <div style="border: 2px solid #f59e0b; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="color: #f59e0b; margin-bottom: 0.5rem;">
+                        🔄 sync.html
+                    </h3>
+                    <p style="margin-bottom: 1rem;">배송 정보 상태 동기화 (수동 확인 후 실행)</p>
+                    <a href="sync.html" class="btn" style="background: #f59e0b; color: white;">
+                        <i class="fas fa-external-link-alt"></i> 열기
+                    </a>
+                </div>
+
+                <!-- fix-delivery.html -->
+                <div style="border: 2px solid #6b7280; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="color: #6b7280; margin-bottom: 0.5rem;">
+                        🔧 fix-delivery.html
+                    </h3>
+                    <p style="margin-bottom: 1rem;">특정 처방전의 배송 상태 단일 수정</p>
+                    <a href="fix-delivery.html" class="btn btn-secondary">
+                        <i class="fas fa-external-link-alt"></i> 열기
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 빠른 시작 가이드 -->
+        <div class="card" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+            <h2 style="color: #d97706;">⚡ 빠른 시작 가이드</h2>
+            <ol style="line-height: 2; margin-left: 1.5rem;">
+                <li>
+                    <strong>배송 상태 문제 해결:</strong>
+                    <a href="auto-fix.html" style="color: #8b5cf6; font-weight: bold;">auto-fix.html</a> 열기 → 버튼 클릭
+                </li>
+                <li>
+                    <strong>샘플 데이터 추가:</strong>
+                    <a href="test.html" style="color: #10b981; font-weight: bold;">test.html</a> 열기 → "샘플 데이터 추가" 클릭
+                </li>
+                <li>
+                    <strong>약국 완료 검증:</strong>
+                    <a href="verify.html" style="color: #3b82f6; font-weight: bold;">verify.html</a> 열기 → 자동 검증
+                </li>
+                <li>
+                    <strong>환자 포털 접속:</strong>
+                    <a href="index.html" style="color: #2563eb; font-weight: bold;">index.html</a> 열기 → 로그인
+                </li>
+            </ol>
+        </div>
+
+        <!-- 포털 링크 -->
+        <div class="card">
+            <h2>🏥 포털 바로가기</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                <a href="index.html" class="btn btn-primary" style="text-align: center;">
+                    <i class="fas fa-home"></i><br>메인 페이지
+                </a>
+                <a href="patient.html" class="btn" style="background: #3b82f6; color: white; text-align: center;">
+                    <i class="fas fa-user-injured"></i><br>환자 포털
+                </a>
+                <a href="hospital.html" class="btn" style="background: #10b981; color: white; text-align: center;">
+                    <i class="fas fa-hospital"></i><br>병원 포털
+                </a>
+                <a href="pharmacy.html" class="btn" style="background: #f59e0b; color: white; text-align: center;">
+                    <i class="fas fa-store"></i><br>약국 포털
+                </a>
+                <a href="admin.html" class="btn" style="background: #ef4444; color: white; text-align: center;">
+                    <i class="fas fa-user-shield"></i><br>관리자 포털
+                </a>
+            </div>
+        </div>
+
+        <!-- 문서 링크 -->
+        <div class="card" style="background: #f0fdf4; border: 2px solid #86efac;">
+            <h2>📚 문서 및 가이드</h2>
+            <div style="margin-top: 1rem;">
+                <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 0.5rem;">
+                    <h3 style="color: #16a34a; margin-bottom: 0.5rem;">
+                        📖 DATA-GUIDE.md
+                    </h3>
+                    <p style="color: #666; margin-bottom: 0.5rem;">병원, 약국, 환자 정보 추가 상세 가이드</p>
+                    <a href="DATA-GUIDE.md" class="btn" style="background: #22c55e; color: white;">
+                        <i class="fas fa-book-open"></i> 가이드 읽기
+                    </a>
+                </div>
+                <div style="margin-bottom: 1rem; padding: 1rem; background: white; border-radius: 0.5rem;">
+                    <h3 style="color: #2563eb; margin-bottom: 0.5rem;">
+                        📄 README.md
+                    </h3>
+                    <p style="color: #666; margin-bottom: 0.5rem;">프로젝트 전체 문서 및 기능 설명</p>
+                    <a href="README.md" class="btn btn-primary">
+                        <i class="fas fa-book"></i> 문서 읽기
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+</body>
+</html>

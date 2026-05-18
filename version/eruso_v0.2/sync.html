@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>배송 정보 동기화 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container" style="padding: 2rem;">
+        <h1>배송 정보 상태 동기화</h1>
+        
+        <div class="card" style="background: #fef3c7; border-left: 4px solid #f59e0b;">
+            <h3 style="color: #d97706;">⚠️ 주의사항</h3>
+            <p>이 도구는 처방전 상태와 배송 정보 상태가 일치하지 않을 때 사용합니다.</p>
+            <ul style="margin-left: 1.5rem; line-height: 1.8;">
+                <li>처방전 상태가 "완료"인데 배송 상태가 "대기중"인 경우</li>
+                <li>처방전 상태가 "배송중"인데 배송 상태가 "대기중"인 경우</li>
+                <li>데이터 동기화 작업은 되돌릴 수 없습니다</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>1단계: 현재 상태 확인</h2>
+            <div id="statusResults"></div>
+            <button class="btn btn-primary" onclick="checkStatus()">상태 확인</button>
+        </div>
+
+        <div class="card">
+            <h2>2단계: 불일치 데이터 수정</h2>
+            <div id="syncResults"></div>
+            <button class="btn btn-success" onclick="syncDeliveryStatus()" id="syncBtn" disabled>
+                배송 정보 동기화 실행
+            </button>
+        </div>
+
+        <div class="card">
+            <h2>3단계: 수정 결과 확인</h2>
+            <div id="finalResults"></div>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+    <script>
+        let mismatches = [];
+
+        async function checkStatus() {
+            const resultsDiv = document.getElementById('statusResults');
+            const syncBtn = document.getElementById('syncBtn');
+            resultsDiv.innerHTML = '<div class="spinner"></div><p>데이터 확인 중...</p>';
+            syncBtn.disabled = true;
+            mismatches = [];
+
+            try {
+                // 모든 처방전 가져오기
+                const prescriptionsData = await fetchTableData('prescriptions');
+                const prescriptions = prescriptionsData?.data || [];
+
+                // 모든 배송 정보 가져오기
+                const deliveriesData = await fetchTableData('deliveries');
+                const deliveries = deliveriesData?.data || [];
+
+                // 불일치 확인
+                let html = '<div style="font-family: monospace; font-size: 0.9rem;">';
+                html += `<p><strong>총 처방전:</strong> ${prescriptions.length}개</p>`;
+                html += `<p><strong>총 배송 정보:</strong> ${deliveries.length}개</p>`;
+                html += `<hr style="margin: 1rem 0;">`;
+
+                prescriptions.forEach(p => {
+                    const delivery = deliveries.find(d => d.prescription_id === p.id);
+                    
+                    if (delivery) {
+                        const prescriptionStatus = p.status;
+                        const deliveryStatus = delivery.status;
+                        
+                        // 상태 매핑
+                        const expectedDeliveryStatus = getExpectedDeliveryStatus(prescriptionStatus);
+                        
+                        if (deliveryStatus !== expectedDeliveryStatus) {
+                            mismatches.push({
+                                prescription: p,
+                                delivery: delivery,
+                                expectedStatus: expectedDeliveryStatus
+                            });
+                        }
+                    }
+                });
+
+                if (mismatches.length > 0) {
+                    html += `<p style="color: #ef4444; font-weight: bold;">⚠️ 불일치 발견: ${mismatches.length}건</p>`;
+                    html += '<table class="table" style="margin-top: 1rem;"><thead><tr>';
+                    html += '<th>처방전 ID</th><th>환자명</th><th>처방전 상태</th><th>배송 상태</th><th>예상 상태</th>';
+                    html += '</tr></thead><tbody>';
+
+                    mismatches.forEach(m => {
+                        html += '<tr>';
+                        html += `<td>${m.prescription.id.substring(0, 8)}</td>`;
+                        html += `<td>${m.prescription.patient_name}</td>`;
+                        html += `<td><span class="badge ${getStatusBadgeClass(m.prescription.status)}">${getStatusText(m.prescription.status)}</span></td>`;
+                        html += `<td><span class="badge ${getStatusBadgeClass(m.delivery.status)}">${getStatusText(m.delivery.status)}</span></td>`;
+                        html += `<td><span class="badge ${getStatusBadgeClass(m.expectedStatus)}">${getStatusText(m.expectedStatus)}</span></td>`;
+                        html += '</tr>';
+                    });
+
+                    html += '</tbody></table>';
+                    syncBtn.disabled = false;
+                } else {
+                    html += '<p style="color: #10b981; font-weight: bold;">✅ 모든 데이터가 일치합니다!</p>';
+                    syncBtn.disabled = true;
+                }
+
+                html += '</div>';
+                resultsDiv.innerHTML = html;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<p style="color: red;">❌ 에러: ${error.message}</p>`;
+            }
+        }
+
+        function getExpectedDeliveryStatus(prescriptionStatus) {
+            // 처방전 상태에 따른 배송 상태 매핑
+            const statusMap = {
+                'issued': 'pending',
+                'received': 'pending',
+                'preparing': 'pending',
+                'delivering': 'in_transit',
+                'completed': 'delivered',
+                'cancelled': 'failed'
+            };
+            return statusMap[prescriptionStatus] || 'pending';
+        }
+
+        async function syncDeliveryStatus() {
+            if (!confirm(`${mismatches.length}건의 배송 정보를 동기화하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
+                return;
+            }
+
+            const syncResultsDiv = document.getElementById('syncResults');
+            const finalResultsDiv = document.getElementById('finalResults');
+            syncResultsDiv.innerHTML = '<div class="spinner"></div><p>동기화 중...</p>';
+            finalResultsDiv.innerHTML = '';
+
+            let successCount = 0;
+            let errorCount = 0;
+            let html = '<div style="font-family: monospace; font-size: 0.85rem;">';
+            html += '<p><strong>동기화 진행 상황:</strong></p><ul style="margin-left: 1.5rem;">';
+
+            for (const mismatch of mismatches) {
+                try {
+                    const updateData = {
+                        status: mismatch.expectedStatus
+                    };
+
+                    // completed 상태인 경우 delivered_at도 업데이트
+                    if (mismatch.expectedStatus === 'delivered' && !mismatch.delivery.delivered_at) {
+                        updateData.delivered_at = new Date().toISOString();
+                    }
+
+                    const result = await patchRecord('deliveries', mismatch.delivery.id, updateData);
+                    
+                    if (result) {
+                        html += `<li style="color: #10b981;">✅ ${mismatch.prescription.id.substring(0, 8)} - ${getStatusText(mismatch.delivery.status)} → ${getStatusText(mismatch.expectedStatus)}</li>`;
+                        successCount++;
+                    } else {
+                        html += `<li style="color: #ef4444;">❌ ${mismatch.prescription.id.substring(0, 8)} - 업데이트 실패</li>`;
+                        errorCount++;
+                    }
+                } catch (error) {
+                    html += `<li style="color: #ef4444;">❌ ${mismatch.prescription.id.substring(0, 8)} - 에러: ${error.message}</li>`;
+                    errorCount++;
+                }
+            }
+
+            html += '</ul>';
+            html += `<hr style="margin: 1rem 0;">`;
+            html += `<p><strong>성공:</strong> <span style="color: #10b981;">${successCount}건</span></p>`;
+            html += `<p><strong>실패:</strong> <span style="color: #ef4444;">${errorCount}건</span></p>`;
+            html += '</div>';
+
+            syncResultsDiv.innerHTML = html;
+
+            // 최종 결과 표시
+            if (successCount > 0) {
+                finalResultsDiv.innerHTML = `
+                    <div style="padding: 1rem; background: #d1fae5; border: 1px solid #10b981; border-radius: 0.5rem; color: #065f46;">
+                        <h3 style="margin: 0 0 0.5rem 0;">✅ 동기화 완료!</h3>
+                        <p style="margin: 0;">${successCount}건의 배송 정보가 업데이트되었습니다.</p>
+                        <button class="btn btn-primary" onclick="checkStatus()" style="margin-top: 1rem;">다시 확인</button>
+                    </div>
+                `;
+            }
+
+            // 동기화 버튼 비활성화
+            document.getElementById('syncBtn').disabled = true;
+        }
+
+        // 페이지 로드 시 자동으로 상태 확인
+        document.addEventListener('DOMContentLoaded', () => {
+            checkStatus();
+        });
+    </script>
+</body>
+</html>

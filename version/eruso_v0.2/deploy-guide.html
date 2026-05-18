@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📦 배포 가이드 - 조치원 스마트 약배송</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .deployment-card {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .deployment-card.recommended {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        .deployment-card.recommended h3 {
+            color: white;
+        }
+        .step-box {
+            background: #f9fafb;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 0.5rem;
+        }
+        .warning-box {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" style="padding: 2rem;">
+        <h1>📦 배포 가이드</h1>
+        
+        <div class="card" style="background: #fee2e2; border-left: 4px solid #ef4444;">
+            <h2 style="color: #dc2626;">❌ 배포 실패 오류</h2>
+            <div style="font-family: monospace; background: #1f2937; color: #ef4444; padding: 1rem; border-radius: 0.5rem; overflow-x: auto;">
+❌ Deployment failed with exit code: 1<br>
+CREATION_FAILED<br>
+❌ Please check your Cloudflare permissions and try again
+            </div>
+            <p style="margin-top: 1rem;">
+                <strong>원인</strong>: 이 프로젝트는 정적 웹사이트이지만 Cloudflare Workers로 배포하려고 시도했습니다.
+            </p>
+        </div>
+
+        <div class="warning-box">
+            <h3 style="color: #d97706; margin-bottom: 1rem;">⚠️ 중요 안내</h3>
+            <p>이 프로젝트는 <strong>Genspark의 RESTful Table API</strong>를 사용하므로:</p>
+            <ul style="margin-left: 1.5rem; line-height: 2;">
+                <li>외부 호스팅 서비스에서는 API가 작동하지 않습니다</li>
+                <li>Genspark 플랫폼 내에서 배포해야 합니다</li>
+                <li>또는 로컬 모드로 제한적으로 사용 가능합니다</li>
+            </ul>
+        </div>
+
+        <!-- Genspark 배포 -->
+        <div class="deployment-card recommended">
+            <h2 style="font-size: 1.8rem; margin-bottom: 1rem;">⭐ 권장: Genspark 플랫폼 배포</h2>
+            <p style="opacity: 0.9; margin-bottom: 1.5rem;">
+                이것이 <strong>유일하게 완전히 작동하는 방법</strong>입니다!
+            </p>
+            
+            <div class="step-box" style="background: white; color: #374151;">
+                <h3 style="color: #667eea;">1단계: Publish 탭 이동</h3>
+                <p>Genspark 인터페이스에서 "Publish" 탭을 찾습니다.</p>
+            </div>
+            
+            <div class="step-box" style="background: white; color: #374151;">
+                <h3 style="color: #667eea;">2단계: 배포 버튼 클릭</h3>
+                <p>"Publish" 또는 "Deploy" 버튼을 클릭합니다.</p>
+            </div>
+            
+            <div class="step-box" style="background: white; color: #374151;">
+                <h3 style="color: #667eea;">3단계: URL 받기</h3>
+                <p>배포가 완료되면 고유한 URL을 받습니다.</p>
+            </div>
+            
+            <div class="step-box" style="background: white; color: #374151;">
+                <h3 style="color: #667eea;">4단계: 사용 시작</h3>
+                <p>해당 URL에서 프로젝트를 사용합니다.</p>
+            </div>
+            
+            <div style="background: rgba(255,255,255,0.2); padding: 1rem; border-radius: 0.5rem; margin-top: 1rem;">
+                <strong>✅ 장점:</strong>
+                <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                    <li>RESTful Table API 완전 지원</li>
+                    <li>모든 기능 정상 작동</li>
+                    <li>데이터 영구 저장</li>
+                    <li>어디서나 접근 가능</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 로컬 모드 -->
+        <div class="deployment-card">
+            <h3 style="color: #f59e0b;">⚠️ 대안: 로컬 모드 (제한적)</h3>
+            <p>외부 배포가 불가능한 경우 사용합니다.</p>
+            
+            <div class="step-box">
+                <h4>사용 방법</h4>
+                <ol style="margin-left: 1.5rem; line-height: 2;">
+                    <li>fix-404.html 열기</li>
+                    <li>"로컬 모드 활성화" 버튼 클릭</li>
+                    <li>페이지 새로고침</li>
+                    <li>index.html에서 로그인</li>
+                </ol>
+            </div>
+            
+            <p style="color: #6b7280; margin-top: 1rem;">
+                ⚠️ 단점: 브라우저 LocalStorage만 사용, 데이터 공유 불가, 제한적 기능
+            </p>
+        </div>
+
+        <!-- 다른 배포 방법 (참고용) -->
+        <div class="card">
+            <h2>📚 참고: 다른 정적 호스팅 서비스</h2>
+            <p style="color: #ef4444; font-weight: bold;">⚠️ 주의: 아래 방법들은 RESTful Table API를 지원하지 않습니다!</p>
+            
+            <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                <!-- Vercel -->
+                <div style="border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="color: #000;">Vercel</h3>
+                    <ol style="margin-left: 1.5rem; line-height: 2; font-size: 0.9rem;">
+                        <li>vercel.com 가입</li>
+                        <li>프로젝트 업로드</li>
+                        <li>자동 배포</li>
+                    </ol>
+                    <p style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem;">
+                        ❌ RESTful Table API 미지원
+                    </p>
+                </div>
+
+                <!-- Netlify -->
+                <div style="border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="color: #00ad9f;">Netlify</h3>
+                    <ol style="margin-left: 1.5rem; line-height: 2; font-size: 0.9rem;">
+                        <li>netlify.com 가입</li>
+                        <li>폴더 드래그 앤 드롭</li>
+                        <li>즉시 배포</li>
+                    </ol>
+                    <p style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem;">
+                        ❌ RESTful Table API 미지원
+                    </p>
+                </div>
+
+                <!-- GitHub Pages -->
+                <div style="border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="color: #181717;">GitHub Pages</h3>
+                    <ol style="margin-left: 1.5rem; line-height: 2; font-size: 0.9rem;">
+                        <li>GitHub 리포지토리 생성</li>
+                        <li>파일 업로드</li>
+                        <li>Settings → Pages 활성화</li>
+                    </ol>
+                    <p style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem;">
+                        ❌ RESTful Table API 미지원
+                    </p>
+                </div>
+
+                <!-- Cloudflare Pages -->
+                <div style="border: 2px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem;">
+                    <h3 style="color: #f38020;">Cloudflare Pages</h3>
+                    <ol style="margin-left: 1.5rem; line-height: 2; font-size: 0.9rem;">
+                        <li>Cloudflare 대시보드</li>
+                        <li>Pages → Create project</li>
+                        <li>폴더 업로드</li>
+                    </ol>
+                    <p style="color: #ef4444; font-size: 0.85rem; margin-top: 0.5rem;">
+                        ❌ RESTful Table API 미지원
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 로컬 개발 서버 -->
+        <div class="card">
+            <h2>💻 로컬 개발 서버 (개발용)</h2>
+            <p>로컬에서 UI를 테스트할 때만 사용합니다.</p>
+            
+            <div style="margin-top: 1rem;">
+                <h4>Python 3</h4>
+                <div style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; font-family: monospace;">
+python -m http.server 8000<br>
+# 브라우저에서: http://localhost:8000
+                </div>
+
+                <h4 style="margin-top: 1rem;">Node.js</h4>
+                <div style="background: #1f2937; color: #10b981; padding: 1rem; border-radius: 0.5rem; font-family: monospace;">
+npx http-server -p 8000<br>
+# 브라우저에서: http://localhost:8000
+                </div>
+            </div>
+        </div>
+
+        <!-- 빠른 액션 -->
+        <div class="card" style="background: #e0e7ff; border-left: 4px solid #6366f1;">
+            <h2 style="color: #4338ca;">🚀 지금 바로 할 수 있는 일</h2>
+            <div style="display: grid; gap: 1rem; margin-top: 1rem;">
+                <button class="btn" style="background: #667eea; color: white;" onclick="alert('Genspark의 Publish 탭으로 이동하세요!')">
+                    ⭐ Genspark에서 배포하기 (권장)
+                </button>
+                <button class="btn btn-warning" onclick="window.location.href='fix-404.html'">
+                    ⚠️ 로컬 모드 활성화하기
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='start.html'">
+                    🗺️ 시작 페이지로 돌아가기
+                </button>
+            </div>
+        </div>
+
+        <!-- 문제 해결 -->
+        <div class="card">
+            <h2>🔧 문제 해결</h2>
+            
+            <details style="margin-bottom: 1rem;">
+                <summary style="cursor: pointer; font-weight: bold; padding: 0.5rem; background: #f9fafb; border-radius: 0.5rem;">
+                    Cloudflare Workers 배포 실패
+                </summary>
+                <div style="padding: 1rem; margin-top: 0.5rem;">
+                    <p><strong>원인</strong>: 이 프로젝트는 정적 웹사이트입니다. Cloudflare Workers가 아닌 Pages를 사용해야 합니다.</p>
+                    <p><strong>해결</strong>: Cloudflare Pages 또는 다른 정적 호스팅 서비스를 사용하세요.</p>
+                    <p><strong>중요</strong>: 그러나 RESTful Table API는 Genspark에서만 작동합니다!</p>
+                </div>
+            </details>
+
+            <details style="margin-bottom: 1rem;">
+                <summary style="cursor: pointer; font-weight: bold; padding: 0.5rem; background: #f9fafb; border-radius: 0.5rem;">
+                    API 404 오류
+                </summary>
+                <div style="padding: 1rem; margin-top: 0.5rem;">
+                    <p><strong>원인</strong>: RESTful Table API에 접근할 수 없습니다.</p>
+                    <p><strong>해결</strong>: Genspark에서 배포하거나 로컬 모드를 사용하세요.</p>
+                    <a href="fix-404.html" class="btn btn-primary" style="display: inline-block; margin-top: 0.5rem;">
+                        fix-404.html 열기
+                    </a>
+                </div>
+            </details>
+
+            <details>
+                <summary style="cursor: pointer; font-weight: bold; padding: 0.5rem; background: #f9fafb; border-radius: 0.5rem;">
+                    권한 오류
+                </summary>
+                <div style="padding: 1rem; margin-top: 0.5rem;">
+                    <p><strong>메시지</strong>: "Please check your Cloudflare permissions"</p>
+                    <p><strong>해결</strong>: 이 오류는 무시하세요. 정적 호스팅 방법을 사용하면 됩니다.</p>
+                </div>
+            </details>
+        </div>
+    </div>
+
+    <script src="js/common.js"></script>
+</body>
+</html>
